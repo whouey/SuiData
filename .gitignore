@@ -1,0 +1,14 @@
+# Move
+move/build/
+
+# Node
+node_modules/
+scripts/node_modules/
+
+# Env
+.env
+.env.local
+*.local
+
+# OS
+.DS_Store
