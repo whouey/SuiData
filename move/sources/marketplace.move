@@ -18,6 +18,8 @@ use suidata::identity::{Self, Identity};
 const EInsufficientPayment: u64 = 0;
 /// Caller's `Identity` is not the one that published this dataset.
 const ENotPublisher: u64 = 1;
+/// Seal policy check failed: caller does not hold a matching `AccessGrant`.
+const ENoAccess: u64 = 2;
 
 // === Structs ===
 
@@ -108,15 +110,18 @@ public fun list_dataset(
 
 /// Purchase access to a dataset. Asserts `payment >= price`, forwards payment
 /// to the publisher, mints an `AccessGrant` to the buyer, and emits a
-/// `PurchaseEvent`.
+/// `PurchaseEvent`. Splits the exact `price` to the publisher and returns any
+/// change to the buyer, so the caller need not pass an exact coin.
 #[allow(lint(self_transfer))]
-public fun purchase(dataset: &Dataset, payment: Coin<SUI>, ctx: &mut TxContext) {
+public fun purchase(dataset: &Dataset, mut payment: Coin<SUI>, ctx: &mut TxContext) {
     let buyer = ctx.sender();
     assert!(coin::value(&payment) >= dataset.price, EInsufficientPayment);
 
-    // TODO: split exact `price` and return change to the buyer instead of
-    // forwarding the whole coin. For the MVP the caller must pass an exact coin.
-    transfer::public_transfer(payment, dataset.publisher);
+    // Split exactly `price` for the publisher; the remainder stays in `payment`
+    // and is returned to the buyer as change.
+    let paid = coin::split(&mut payment, dataset.price, ctx);
+    transfer::public_transfer(paid, dataset.publisher);
+    transfer::public_transfer(payment, buyer);
 
     let grant = AccessGrant {
         id: object::new(ctx),
@@ -133,6 +138,23 @@ public fun purchase(dataset: &Dataset, payment: Coin<SUI>, ctx: &mut TxContext) 
     });
 
     transfer::transfer(grant, buyer);
+}
+
+// === Seal policy ===
+
+/// Seal access policy. Seal runs this in a dry-run PTB before releasing
+/// decryption keys; if it does NOT abort, access is granted.
+///
+/// The encryption identity (`id`) is the dataset's object id bytes. Access is
+/// allowed iff the caller supplies an `AccessGrant` minted for that same
+/// dataset (which `purchase` is the only way to obtain).
+///
+/// `id` must be the first parameter — Seal passes the key identity there.
+entry fun seal_approve(id: vector<u8>, grant: &AccessGrant, dataset: &Dataset) {
+    // The grant must be for this dataset...
+    assert!(grant.dataset_id == object::id(dataset), ENoAccess);
+    // ...and the requested key identity must match this dataset.
+    assert!(id == object::id_to_bytes(&object::id(dataset)), ENoAccess);
 }
 
 // === Accessors ===

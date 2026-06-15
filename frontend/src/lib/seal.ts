@@ -2,57 +2,113 @@
 //
 // Design (see CLAUDE.md): encrypt the dataset client-side BEFORE uploading the
 // ciphertext to Walrus. Decryption is gated on-chain by the Seal policy
-// "caller holds an AccessGrant for this dataset" — so only a buyer who called
-// marketplace::purchase can obtain the keys to decrypt.
+// `marketplace::seal_approve` — "caller holds an AccessGrant for this dataset" —
+// so only a buyer who called marketplace::purchase can obtain the keys.
+//
+// The Seal encryption identity is the Dataset's object id bytes; that's exactly
+// what `seal_approve(id, grant, dataset)` checks on-chain.
 
-import { SealClient } from "@mysten/seal";
+import { SealClient, SessionKey } from "@mysten/seal";
 import type { SealCompatibleClient } from "@mysten/seal";
-import { PACKAGE_ID } from "./network";
+import { Transaction } from "@mysten/sui/transactions";
+import { fromHex } from "@mysten/sui/utils";
+import { MODULE, PACKAGE_ID } from "./network";
 
 /**
- * Build a Seal client bound to the configured key servers.
+ * Seal key servers (object id + URL) for testnet. Threshold of `THRESHOLD`
+ * servers must return shares to decrypt.
  *
- * TODO: pin the actual testnet key-server object ids before the demo. The empty
- * list here keeps the module importable/buildable but encrypt/decrypt will fail
- * until configured.
+ * TODO: fill in the testnet key-server object ids before the demo. With an
+ * empty list the SealClient builds but encrypt/decrypt will fail.
  */
+export const KEY_SERVERS: { objectId: string; url: string }[] = [];
+export const THRESHOLD = 1;
+
+/** Build a Seal client bound to the configured key servers. */
 export function makeSealClient(suiClient: SealCompatibleClient): SealClient {
   return new SealClient({
     suiClient,
-    serverConfigs: [], // TODO: testnet Seal key servers
+    serverConfigs: KEY_SERVERS.map((s) => ({
+      objectId: s.objectId,
+      url: s.url,
+      weight: 1,
+    })),
     verifyKeyServers: false,
   });
 }
 
+/** The Seal identity (hex, no 0x) for a dataset = its object id bytes. */
+function datasetIdentity(datasetId: string): string {
+  return datasetId.startsWith("0x") ? datasetId.slice(2) : datasetId;
+}
+
 /**
- * Encrypt dataset bytes so that only holders of an AccessGrant for `datasetId`
- * can later decrypt. Returns the ciphertext to hand to Walrus.
- *
- * TODO: implement using SealClient.encrypt with an identity/policy derived from
- * the dataset id + marketplace package. Stubbed for the scaffold.
+ * Encrypt dataset bytes so only holders of an AccessGrant for `datasetId` can
+ * later decrypt. Returns the ciphertext to hand to Walrus.
  */
 export async function encryptDataset(
-  _client: SealClient,
-  _datasetId: string,
-  _plaintext: Uint8Array,
+  client: SealClient,
+  datasetId: string,
+  plaintext: Uint8Array,
 ): Promise<Uint8Array> {
-  throw new Error("TODO: implement Seal encryption (encryptDataset)");
+  const { encryptedObject } = await client.encrypt({
+    threshold: THRESHOLD,
+    packageId: PACKAGE_ID,
+    id: datasetIdentity(datasetId),
+    data: plaintext,
+  });
+  return encryptedObject;
 }
 
 /**
- * Decrypt dataset bytes. The on-chain Seal policy verifies the caller holds an
- * AccessGrant for the dataset before releasing keys.
- *
- * TODO: implement using SealClient.decrypt with a SessionKey and a PTB that
- * proves AccessGrant ownership (the seal_approve* entry on-chain).
+ * Build the `seal_approve` PTB the key servers dry-run to authorize decryption.
+ * Returns transaction-kind bytes (no gas/sender), as Seal expects.
  */
-export async function decryptDataset(
-  _client: SealClient,
-  _datasetId: string,
-  _ciphertext: Uint8Array,
+export async function buildApproveTxBytes(
+  client: SealCompatibleClient,
+  datasetId: string,
+  accessGrantId: string,
 ): Promise<Uint8Array> {
-  throw new Error("TODO: implement Seal decryption (decryptDataset)");
+  const tx = new Transaction();
+  tx.moveCall({
+    target: `${PACKAGE_ID}::${MODULE.marketplace}::seal_approve`,
+    arguments: [
+      tx.pure.vector("u8", Array.from(fromHex(datasetIdentity(datasetId)))),
+      tx.object(accessGrantId),
+      tx.object(datasetId),
+    ],
+  });
+  return tx.build({ client, onlyTransactionKind: true });
 }
 
-// Re-export so callers don't need to know the package wiring detail yet.
-export const SEAL_POLICY_PACKAGE = PACKAGE_ID;
+/**
+ * Decrypt dataset bytes. `sessionKey` must be created + signed by the buyer's
+ * wallet (see makeSessionKey); the on-chain policy verifies AccessGrant
+ * ownership via the `seal_approve` PTB in `txBytes`.
+ */
+export async function decryptDataset(
+  client: SealClient,
+  sessionKey: SessionKey,
+  txBytes: Uint8Array,
+  ciphertext: Uint8Array,
+): Promise<Uint8Array> {
+  return client.decrypt({ data: ciphertext, sessionKey, txBytes });
+}
+
+/**
+ * Create a SessionKey for `address` scoped to this package. The caller must
+ * sign `sessionKey.getPersonalMessage()` with the wallet and pass it to
+ * `setPersonalMessageSignature` before decrypting.
+ */
+export function makeSessionKey(
+  suiClient: SealCompatibleClient,
+  address: string,
+  ttlMin = 10,
+): Promise<SessionKey> {
+  return SessionKey.create({
+    address,
+    packageId: PACKAGE_ID,
+    ttlMin,
+    suiClient,
+  });
+}

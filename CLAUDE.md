@@ -127,8 +127,13 @@ scripts/
 - [x] `sui move build` compiles.
 - [x] Vite React-TS frontend initialized; `@mysten/dapp-kit` + `@mysten/seal` installed.
 - [x] README.md with setup steps + demo flow.
-- [ ] Implement real bodies for `purchase` (coin split / change handling) and grant minting.
-- [ ] Wire Walrus upload/download (`lib/walrus.ts`).
-- [ ] Wire Seal encrypt/decrypt + policy (`lib/seal.ts`).
-- [ ] Publish package to testnet; fill in `PACKAGE_ID`.
+- [x] `purchase` splits exact `price` to publisher and returns change to buyer.
+- [x] On-chain Seal policy `marketplace::seal_approve(id, grant, dataset)` added
+      (gate = buyer holds an `AccessGrant` for the dataset; identity = dataset id bytes).
+- [x] `lib/seal.ts`: concrete encrypt/decrypt, `seal_approve` PTB builder, SessionKey
+      helper. NOTE: `KEY_SERVERS` is empty — fill in testnet key-server object ids.
+- [x] `lib/walrus.ts`: HTTP publisher/aggregator upload+download.
+- [ ] Publish package to testnet; fill in `PACKAGE_ID`. (Blocked: faucet rate-limited
+      our shared IP — fund via https://faucet.sui.io then run `./scripts/publish.sh`.)
+- [ ] Configure `KEY_SERVERS` in `lib/seal.ts` with real testnet Seal servers.
 - [ ] Frontend: identity creation, listing form, browse + purchase, decrypt + read.
