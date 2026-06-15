@@ -15,13 +15,21 @@ import { fromHex } from "@mysten/sui/utils";
 import { MODULE, PACKAGE_ID } from "./network";
 
 /**
- * Seal key servers (object id + URL) for testnet. Threshold of `THRESHOLD`
- * servers must return shares to decrypt.
+ * Seal key servers (object id + URL) for testnet. A `THRESHOLD` of these must
+ * return key shares to decrypt.
  *
- * TODO: fill in the testnet key-server object ids before the demo. With an
- * empty list the SealClient builds but encrypt/decrypt will fail.
+ * This is Mysten's allowlisted, open-mode testnet key server (object id
+ * confirmed live on-chain via its `/v1/service` endpoint). Fine for the demo;
+ * for production use multiple verified servers and a higher threshold. Newer
+ * @mysten/seal exposes getAllowlistedKeyServers('testnet') to fetch these.
  */
-export const KEY_SERVERS: { objectId: string; url: string }[] = [];
+export const KEY_SERVERS: { objectId: string; url: string }[] = [
+  {
+    objectId:
+      "0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75",
+    url: "https://seal-key-server-testnet-1.mystenlabs.com",
+  },
+];
 export const THRESHOLD = 1;
 
 /** Build a Seal client bound to the configured key servers. */
