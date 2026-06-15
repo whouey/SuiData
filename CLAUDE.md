@@ -47,7 +47,7 @@ path to that one demo, leave a `TODO` and move on.
 ### Deployed package address
 
 ```
-PACKAGE_ID = 0x0  # TODO: fill in after `sui client publish`
+PACKAGE_ID = 0xee8470ddf3958217976cf1e02a3660311dba329625cc23ca068539d6f5df3f22  # testnet
 ```
 
 ### Walrus
@@ -133,7 +133,7 @@ scripts/
 - [x] `lib/seal.ts`: concrete encrypt/decrypt, `seal_approve` PTB builder, SessionKey
       helper. NOTE: `KEY_SERVERS` is empty — fill in testnet key-server object ids.
 - [x] `lib/walrus.ts`: HTTP publisher/aggregator upload+download.
-- [ ] Publish package to testnet; fill in `PACKAGE_ID`. (Blocked: faucet rate-limited
-      our shared IP — fund via https://faucet.sui.io then run `./scripts/publish.sh`.)
+- [x] Published package to testnet; `PACKAGE_ID` filled in (see above). UpgradeCap
+      `0x1a83fd5c7f111265ce1b5279822486ad259fd8ffc058d838f1a1b981137834d7`.
 - [ ] Configure `KEY_SERVERS` in `lib/seal.ts` with real testnet Seal servers.
 - [ ] Frontend: identity creation, listing form, browse + purchase, decrypt + read.

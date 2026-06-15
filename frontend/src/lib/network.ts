@@ -5,9 +5,10 @@
 
 export const NETWORK = "testnet" as const;
 
-/** Deployed Move package id. Placeholder until the package is published. */
+/** Deployed Move package id (testnet). Override via VITE_PACKAGE_ID. */
 export const PACKAGE_ID =
-  (import.meta.env.VITE_PACKAGE_ID as string | undefined) ?? "0x0";
+  (import.meta.env.VITE_PACKAGE_ID as string | undefined) ??
+  "0xee8470ddf3958217976cf1e02a3660311dba329625cc23ca068539d6f5df3f22";
 
 export const MODULE = {
   identity: "identity",
