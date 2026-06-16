@@ -12,24 +12,40 @@ import { SealClient, SessionKey } from "@mysten/seal";
 import type { SealCompatibleClient } from "@mysten/seal";
 import { Transaction } from "@mysten/sui/transactions";
 import { fromHex } from "@mysten/sui/utils";
-import { MODULE, PACKAGE_ID } from "./network";
+import { MODULE, NETWORK, PACKAGE_ID } from "./network";
 
 /**
- * Seal key servers (object id + URL) for testnet. A `THRESHOLD` of these must
- * return key shares to decrypt.
+ * Allowlisted Seal key servers per network.
  *
- * This is Mysten's allowlisted, open-mode testnet key server (object id
- * confirmed live on-chain via its `/v1/service` endpoint). Fine for the demo;
- * for production use multiple verified servers and a higher threshold. Newer
- * @mysten/seal exposes getAllowlistedKeyServers('testnet') to fetch these.
+ * `@mysten/seal` shipped a `getAllowlistedKeyServers(network)` helper in 0.4.x
+ * but REMOVED it in the 1.x line (which our stack requires). It only ever
+ * returned a static list, so we replicate it here. Object ids are confirmed
+ * live on-chain via each server's `/v1/service` endpoint.
+ *
+ * To add Mysten's second testnet server (or swap in your own), append here and
+ * bump `THRESHOLD`.
  */
-export const KEY_SERVERS: { objectId: string; url: string }[] = [
-  {
-    objectId:
-      "0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75",
-    url: "https://seal-key-server-testnet-1.mystenlabs.com",
-  },
-];
+const ALLOWLISTED_KEY_SERVERS: Record<
+  "testnet" | "mainnet",
+  { objectId: string; url: string }[]
+> = {
+  testnet: [
+    {
+      objectId:
+        "0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75",
+      url: "https://seal-key-server-testnet-1.mystenlabs.com",
+    },
+  ],
+  mainnet: [],
+};
+
+/** Drop-in for the removed SDK helper: the allowlisted key servers for `net`. */
+export function getAllowlistedKeyServers(net: "testnet" | "mainnet") {
+  return ALLOWLISTED_KEY_SERVERS[net];
+}
+
+/** Key servers in use. A `THRESHOLD` of these must return shares to decrypt. */
+export const KEY_SERVERS = getAllowlistedKeyServers(NETWORK);
 export const THRESHOLD = 1;
 
 /** Build a Seal client bound to the configured key servers. */
