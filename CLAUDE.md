@@ -47,7 +47,7 @@ path to that one demo, leave a `TODO` and move on.
 ### Deployed package address
 
 ```
-PACKAGE_ID = 0xee8470ddf3958217976cf1e02a3660311dba329625cc23ca068539d6f5df3f22  # testnet
+PACKAGE_ID = 0x3351d2f8ea2a62ed8ee75d7403a20d5dc4b47542a33e51bd2e3dfe8acddffdc1  # testnet
 ```
 
 ### Walrus
@@ -128,12 +128,15 @@ scripts/
 - [x] Vite React-TS frontend initialized; `@mysten/dapp-kit` + `@mysten/seal` installed.
 - [x] README.md with setup steps + demo flow.
 - [x] `purchase` splits exact `price` to publisher and returns change to buyer.
-- [x] On-chain Seal policy `marketplace::seal_approve(id, grant, dataset)` added
-      (gate = buyer holds an `AccessGrant` for the dataset; identity = dataset id bytes).
-- [x] `lib/seal.ts`: concrete encrypt/decrypt, `seal_approve` PTB builder, SessionKey
-      helper. NOTE: `KEY_SERVERS` is empty — fill in testnet key-server object ids.
+- [x] On-chain Seal policy `marketplace::seal_approve(id, grant, dataset)` added.
+      Gate = caller holds an `AccessGrant` for the dataset AND `id` matches the
+      dataset's `seal_policy_id` (a client-generated per-dataset id, stored as
+      `vector<u8>`). This binding lets us encrypt BEFORE the dataset object
+      exists and stops one dataset's grant decrypting another's.
+- [x] `lib/seal.ts`: concrete encrypt/decrypt, `seal_approve` PTB builder,
+      SessionKey helper, `getAllowlistedKeyServers` drop-in. `KEY_SERVERS`
+      configured with Mysten's testnet key server (threshold 1).
 - [x] `lib/walrus.ts`: HTTP publisher/aggregator upload+download.
 - [x] Published package to testnet; `PACKAGE_ID` filled in (see above). UpgradeCap
-      `0x1a83fd5c7f111265ce1b5279822486ad259fd8ffc058d838f1a1b981137834d7`.
-- [ ] Configure `KEY_SERVERS` in `lib/seal.ts` with real testnet Seal servers.
-- [ ] Frontend: identity creation, listing form, browse + purchase, decrypt + read.
+      `0xd9fe7230076340c73d7b37f3275773f238044769cc6585ab9578444a290ae4dc`.
+- [x] Frontend: identity creation, listing form, browse + purchase, decrypt + read.

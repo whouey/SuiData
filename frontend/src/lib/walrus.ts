@@ -13,8 +13,8 @@ import { WALRUS } from "./network";
  * (WalrusClient) once wallet-funded WAL handling is wired up. For the MVP demo
  * the HTTP publisher is the simplest path.
  */
-export async function uploadBlob(data: Uint8Array): Promise<string> {
-  const res = await fetch(`${WALRUS.publisher}/v1/blobs`, {
+export async function uploadBlob(data: Uint8Array, epochs = 5): Promise<string> {
+  const res = await fetch(`${WALRUS.publisher}/v1/blobs?epochs=${epochs}`, {
     method: "PUT",
     body: data as BodyInit,
   });

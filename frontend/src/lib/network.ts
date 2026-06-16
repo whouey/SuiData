@@ -8,7 +8,7 @@ export const NETWORK = "testnet" as const;
 /** Deployed Move package id (testnet). Override via VITE_PACKAGE_ID. */
 export const PACKAGE_ID =
   (import.meta.env.VITE_PACKAGE_ID as string | undefined) ??
-  "0xee8470ddf3958217976cf1e02a3660311dba329625cc23ca068539d6f5df3f22";
+  "0x3351d2f8ea2a62ed8ee75d7403a20d5dc4b47542a33e51bd2e3dfe8acddffdc1";
 
 export const MODULE = {
   identity: "identity",

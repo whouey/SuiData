@@ -1,11 +1,16 @@
-// React hook exposing the SuiData on-chain actions to components.
+// React hooks exposing SuiData's on-chain actions + reads to components.
 //
-// Builds programmable transaction blocks against the deployed Move package and
-// submits them via the connected wallet. Bodies are stubbed where they depend
-// on data wiring (Walrus/Seal) that lands in later sessions.
+// Mutations build programmable transaction blocks against the deployed Move
+// package and submit them via the connected wallet. Reads use react-query.
 
-import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+  useSuiClientQuery,
+} from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
+import { useQuery } from "@tanstack/react-query";
 import { MODULE, PACKAGE_ID } from "../lib/network";
 
 export interface ListDatasetArgs {
@@ -16,8 +21,30 @@ export interface ListDatasetArgs {
   /** Price in MIST. */
   price: number | bigint;
   walrusBlobId: string;
-  sealPolicyId: string;
+  /** Seal policy id bytes — stored on-chain as vector<u8>. */
+  sealPolicyId: Uint8Array;
 }
+
+export interface Dataset {
+  id: string;
+  publisher: string;
+  title: string;
+  description: string;
+  category: string;
+  /** Price in MIST. */
+  price: bigint;
+  walrusBlobId: string;
+  /** Seal policy id (hex, no 0x) the payload was encrypted under. */
+  sealPolicyIdHex: string;
+}
+
+export interface Identity {
+  id: string;
+  kind: number;
+  displayName: string;
+}
+
+// === Mutations ===
 
 export function useSuiData() {
   const client = useSuiClient();
@@ -45,17 +72,15 @@ export function useSuiData() {
         tx.pure.string(args.category),
         tx.pure.u64(args.price),
         tx.pure.string(args.walrusBlobId),
-        tx.pure.string(args.sealPolicyId),
+        tx.pure.vector("u8", Array.from(args.sealPolicyId)),
       ],
     });
     return signAndExecute({ transaction: tx });
   }
 
   /**
-   * marketplace::purchase(dataset, payment)
-   *
-   * TODO: for the MVP `purchase` consumes the whole coin, so split an exact
-   * `price` coin from gas before calling. Refine once purchase() returns change.
+   * marketplace::purchase(dataset, payment). `purchase` returns change, so we
+   * just split the exact `price` off gas for the payment coin.
    */
   async function purchase(datasetId: string, price: number | bigint) {
     const tx = new Transaction();
@@ -68,4 +93,120 @@ export function useSuiData() {
   }
 
   return { client, createIdentity, listDataset, purchase };
+}
+
+// === Reads ===
+
+/** Bytes-or-base64 vector<u8> from RPC -> hex string (no 0x). */
+function vecU8ToHex(v: unknown): string {
+  let bytes: Uint8Array;
+  if (Array.isArray(v)) {
+    bytes = Uint8Array.from(v as number[]);
+  } else if (typeof v === "string") {
+    // RPC may return a base64 string for vector<u8>.
+    bytes = Uint8Array.from(atob(v), (c) => c.charCodeAt(0));
+  } else {
+    return "";
+  }
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Identities owned by the connected wallet. */
+export function useOwnedIdentities() {
+  const account = useCurrentAccount();
+  return useSuiClientQuery(
+    "getOwnedObjects",
+    {
+      owner: account?.address ?? "",
+      filter: { StructType: `${PACKAGE_ID}::${MODULE.identity}::Identity` },
+      options: { showContent: true },
+    },
+    {
+      enabled: !!account,
+      select: (data): Identity[] =>
+        data.data.flatMap((o) => {
+          const c = o.data?.content;
+          if (!c || c.dataType !== "moveObject") return [];
+          const f = c.fields as Record<string, unknown>;
+          return [
+            {
+              id: o.data!.objectId,
+              kind: Number(f.kind),
+              displayName: String(f.display_name),
+            },
+          ];
+        }),
+    },
+  );
+}
+
+/** AccessGrants owned by the connected wallet, keyed by dataset id. */
+export function useOwnedGrants() {
+  const account = useCurrentAccount();
+  return useSuiClientQuery(
+    "getOwnedObjects",
+    {
+      owner: account?.address ?? "",
+      filter: {
+        StructType: `${PACKAGE_ID}::${MODULE.marketplace}::AccessGrant`,
+      },
+      options: { showContent: true },
+    },
+    {
+      enabled: !!account,
+      select: (data): Record<string, string> => {
+        const map: Record<string, string> = {};
+        for (const o of data.data) {
+          const c = o.data?.content;
+          if (!c || c.dataType !== "moveObject") continue;
+          const f = c.fields as Record<string, unknown>;
+          map[String(f.dataset_id)] = o.data!.objectId;
+        }
+        return map;
+      },
+    },
+  );
+}
+
+/** All listed datasets (via DatasetListed events, then object fetch). */
+export function useDatasets() {
+  const client = useSuiClient();
+  return useQuery({
+    queryKey: ["datasets", PACKAGE_ID],
+    queryFn: async (): Promise<Dataset[]> => {
+      const events = await client.queryEvents({
+        query: {
+          MoveEventType: `${PACKAGE_ID}::${MODULE.marketplace}::DatasetListed`,
+        },
+        order: "descending",
+        limit: 50,
+      });
+      const ids = events.data
+        .map((e) => (e.parsedJson as { dataset_id?: string })?.dataset_id)
+        .filter((id): id is string => !!id);
+      if (ids.length === 0) return [];
+
+      const objs = await client.multiGetObjects({
+        ids,
+        options: { showContent: true },
+      });
+      return objs.flatMap((o) => {
+        const c = o.data?.content;
+        if (!c || c.dataType !== "moveObject") return [];
+        const f = c.fields as Record<string, unknown>;
+        return [
+          {
+            id: o.data!.objectId,
+            publisher: String(f.publisher),
+            title: String(f.title),
+            description: String(f.description),
+            category: String(f.category),
+            price: BigInt(String(f.price)),
+            walrusBlobId: String(f.walrus_blob_id),
+            sealPolicyIdHex: vecU8ToHex(f.seal_policy_id),
+          },
+        ];
+      });
+    },
+  });
 }

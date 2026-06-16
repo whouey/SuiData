@@ -73,13 +73,13 @@ npm run dev      # local dev server
 npm run build    # type-check + production build
 ```
 
-The app wires up `@mysten/dapp-kit` providers (testnet by default) and a wallet
-connect button. The marketplace UI, Walrus upload/download (`src/lib/walrus.ts`),
-and Seal encrypt/decrypt (`src/lib/seal.ts`) are stubbed with `TODO`s — see the
-"current status" checklist in `CLAUDE.md`.
+The app wires up `@mysten/dapp-kit` providers (testnet by default) and walks the
+full demo: create an identity, publish (encrypt via Seal → upload to Walrus →
+`list_dataset`), browse/buy, and decrypt + read. See `src/components/` and
+`src/hooks/useSuiData.ts`.
 
 ## Status
 
-This is an early scaffold: contracts compile, the frontend builds, and the
-storage/encryption/payment wiring is stubbed. Track progress in
-[`CLAUDE.md`](./CLAUDE.md#current-status).
+End-to-end demo path is implemented: contracts are published to testnet, the
+frontend builds and drives identity → publish → purchase → decrypt. Track
+remaining polish in [`CLAUDE.md`](./CLAUDE.md#current-status).

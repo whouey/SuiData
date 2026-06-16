@@ -1,12 +1,16 @@
 import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
-import { PACKAGE_ID } from "./lib/network";
+import { IdentityPanel } from "./components/IdentityPanel";
+import { PublishForm } from "./components/PublishForm";
+import { Marketplace } from "./components/Marketplace";
+import { useOwnedIdentities } from "./hooks/useSuiData";
 import "./App.css";
 
-// Scaffold shell for the SuiData dapp. The demo flow (create identity → list a
-// dataset → purchase → decrypt + read) gets wired up in later sessions via
-// useSuiData(), lib/walrus.ts, and lib/seal.ts. See CLAUDE.md.
+// SuiData demo shell: identity → publish (encrypt+Walrus+list) → browse/buy →
+// decrypt+read. See CLAUDE.md for the design.
 function App() {
   const account = useCurrentAccount();
+  const { data: identities } = useOwnedIdentities();
+  const identityId = identities?.[0]?.id ?? null;
 
   return (
     <main style={{ maxWidth: 720, margin: "0 auto", padding: "2rem" }}>
@@ -15,34 +19,26 @@ function App() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: "1rem",
         }}
       >
-        <h1>SuiData</h1>
+        <div>
+          <h1 style={{ margin: 0 }}>SuiData</h1>
+          <p style={{ margin: 0, opacity: 0.6, fontSize: 14 }}>
+            Decentralized identity + data marketplace on Sui
+          </p>
+        </div>
         <ConnectButton />
       </header>
 
-      <p>Decentralized identity + data marketplace on Sui.</p>
-
       {account ? (
-        <section>
-          <p>
-            Connected as <code>{account.address}</code>
-          </p>
-          <ol>
-            <li>Create an on-chain identity (TODO)</li>
-            <li>Publish an encrypted dataset to Walrus (TODO)</li>
-            <li>Buy access with SUI (TODO)</li>
-            <li>Decrypt &amp; read via Seal (TODO)</li>
-          </ol>
-        </section>
+        <>
+          <IdentityPanel />
+          <PublishForm identityId={identityId} />
+          <Marketplace />
+        </>
       ) : (
         <p>Connect a Sui wallet to begin.</p>
-      )}
-
-      {PACKAGE_ID === "0x0" && (
-        <p style={{ color: "#b45309" }}>
-          ⚠️ Move package not yet published — set <code>VITE_PACKAGE_ID</code>.
-        </p>
       )}
     </main>
   );

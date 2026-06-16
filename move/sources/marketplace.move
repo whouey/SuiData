@@ -34,8 +34,10 @@ public struct Dataset has key {
     price: u64,
     /// Walrus blob id of the encrypted payload.
     walrus_blob_id: String,
-    /// Seal policy id gating decryption.
-    seal_policy_id: String,
+    /// Seal encryption identity (the policy id) the payload was encrypted under.
+    /// This is the `id` Seal passes to `seal_approve`; binding decryption to a
+    /// per-dataset id is what stops one dataset's grant decrypting another's.
+    seal_policy_id: vector<u8>,
     created_at: u64,
 }
 
@@ -77,7 +79,7 @@ public fun list_dataset(
     category: String,
     price: u64,
     walrus_blob_id: String,
-    seal_policy_id: String,
+    seal_policy_id: vector<u8>,
     ctx: &mut TxContext,
 ) {
     let publisher = ctx.sender();
@@ -145,16 +147,16 @@ public fun purchase(dataset: &Dataset, mut payment: Coin<SUI>, ctx: &mut TxConte
 /// Seal access policy. Seal runs this in a dry-run PTB before releasing
 /// decryption keys; if it does NOT abort, access is granted.
 ///
-/// The encryption identity (`id`) is the dataset's object id bytes. Access is
-/// allowed iff the caller supplies an `AccessGrant` minted for that same
-/// dataset (which `purchase` is the only way to obtain).
+/// Access is allowed iff (a) the caller supplies an `AccessGrant` minted for
+/// this dataset (which `purchase` is the only way to obtain), and (b) the
+/// requested key identity matches the dataset's `seal_policy_id`. The latter
+/// binds the key to this specific dataset, so a grant for one dataset can't be
+/// used to fetch another dataset's key.
 ///
 /// `id` must be the first parameter — Seal passes the key identity there.
 entry fun seal_approve(id: vector<u8>, grant: &AccessGrant, dataset: &Dataset) {
-    // The grant must be for this dataset...
     assert!(grant.dataset_id == object::id(dataset), ENoAccess);
-    // ...and the requested key identity must match this dataset.
-    assert!(id == object::id_to_bytes(&object::id(dataset)), ENoAccess);
+    assert!(id == dataset.seal_policy_id, ENoAccess);
 }
 
 // === Accessors ===
@@ -165,7 +167,7 @@ public fun publisher(dataset: &Dataset): address { dataset.publisher }
 
 public fun walrus_blob_id(dataset: &Dataset): String { dataset.walrus_blob_id }
 
-public fun seal_policy_id(dataset: &Dataset): String { dataset.seal_policy_id }
+public fun seal_policy_id(dataset: &Dataset): vector<u8> { dataset.seal_policy_id }
 
 public fun grant_dataset_id(grant: &AccessGrant): ID { grant.dataset_id }
 

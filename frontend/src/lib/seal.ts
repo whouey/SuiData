@@ -11,7 +11,7 @@
 import { SealClient, SessionKey } from "@mysten/seal";
 import type { SealCompatibleClient } from "@mysten/seal";
 import { Transaction } from "@mysten/sui/transactions";
-import { fromHex } from "@mysten/sui/utils";
+import { fromHex, toHex } from "@mysten/sui/utils";
 import { MODULE, NETWORK, PACKAGE_ID } from "./network";
 
 /**
@@ -61,24 +61,42 @@ export function makeSealClient(suiClient: SealCompatibleClient): SealClient {
   });
 }
 
-/** The Seal identity (hex, no 0x) for a dataset = its object id bytes. */
-function datasetIdentity(datasetId: string): string {
-  return datasetId.startsWith("0x") ? datasetId.slice(2) : datasetId;
+/** Strip a leading 0x so a value is a bare hex string. */
+function bareHex(id: string): string {
+  return id.startsWith("0x") ? id.slice(2) : id;
 }
 
 /**
- * Encrypt dataset bytes so only holders of an AccessGrant for `datasetId` can
- * later decrypt. Returns the ciphertext to hand to Walrus.
+ * A per-dataset Seal identity ("policy id"). Generated client-side BEFORE the
+ * dataset object exists; the same bytes get stored on-chain as the Dataset's
+ * `seal_policy_id`, and `seal_approve` checks the requested id against it.
+ */
+export interface PolicyId {
+  /** Hex (no 0x) — pass to encrypt/decrypt. */
+  hex: string;
+  /** Raw bytes — store on-chain as `seal_policy_id` (vector<u8>). */
+  bytes: Uint8Array;
+}
+
+/** Generate a fresh random 32-byte policy id. */
+export function generatePolicyId(): PolicyId {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return { hex: toHex(bytes), bytes };
+}
+
+/**
+ * Encrypt dataset bytes under `policyIdHex` so only holders of an AccessGrant
+ * for the matching dataset can later decrypt. Returns ciphertext for Walrus.
  */
 export async function encryptDataset(
   client: SealClient,
-  datasetId: string,
+  policyIdHex: string,
   plaintext: Uint8Array,
 ): Promise<Uint8Array> {
   const { encryptedObject } = await client.encrypt({
     threshold: THRESHOLD,
     packageId: PACKAGE_ID,
-    id: datasetIdentity(datasetId),
+    id: bareHex(policyIdHex),
     data: plaintext,
   });
   return encryptedObject;
@@ -90,14 +108,15 @@ export async function encryptDataset(
  */
 export async function buildApproveTxBytes(
   client: SealCompatibleClient,
-  datasetId: string,
+  policyIdHex: string,
   accessGrantId: string,
+  datasetId: string,
 ): Promise<Uint8Array> {
   const tx = new Transaction();
   tx.moveCall({
     target: `${PACKAGE_ID}::${MODULE.marketplace}::seal_approve`,
     arguments: [
-      tx.pure.vector("u8", Array.from(fromHex(datasetIdentity(datasetId)))),
+      tx.pure.vector("u8", Array.from(fromHex(bareHex(policyIdHex)))),
       tx.object(accessGrantId),
       tx.object(datasetId),
     ],
