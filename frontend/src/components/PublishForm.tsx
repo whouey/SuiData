@@ -25,6 +25,9 @@ export function PublishForm({ identityId }: { identityId: string | null }) {
     "Survey of 1,200 autonomous agents on data-purchasing behavior.",
   );
   const [category, setCategory] = useState("market-survey");
+  const [preview, setPreview] = useState(
+    "Sample: 3 of 1,200 rows + column schema. Full dataset unlocked on purchase.",
+  );
   const [priceSui, setPriceSui] = useState("0.1");
   const [content, setContent] = useState(
     "FINDING: 73% of agents would pay for verified, structured market data.",
@@ -54,6 +57,7 @@ export function PublishForm({ identityId }: { identityId: string | null }) {
         title,
         description,
         category,
+        preview,
         price: BigInt(Math.round(Number(priceSui) * SUI)),
         walrusBlobId: blobId,
         sealPolicyId: policy.bytes,
@@ -100,6 +104,12 @@ export function PublishForm({ identityId }: { identityId: string | null }) {
               style={{ width: 120 }}
             />
           </div>
+          <textarea
+            value={preview}
+            onChange={(e) => setPreview(e.target.value)}
+            placeholder="Public preview / teaser (sample, schema, stats — NOT encrypted)"
+            rows={2}
+          />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}

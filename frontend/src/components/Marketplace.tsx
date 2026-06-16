@@ -125,6 +125,12 @@ function DatasetCard({
         <span>{Number(dataset.price) / SUI} SUI</span>
       </div>
       <p style={{ margin: "4px 0", fontSize: 14 }}>{dataset.description}</p>
+      {dataset.preview && (
+        <p style={previewStyle}>
+          <span style={{ opacity: 0.6 }}>Preview · </span>
+          {dataset.preview}
+        </p>
+      )}
       <p style={{ margin: 0, fontSize: 12, opacity: 0.6 }}>
         {dataset.category} · by{" "}
         <code>
@@ -159,6 +165,14 @@ function DatasetCard({
   );
 }
 
+const previewStyle: React.CSSProperties = {
+  margin: "4px 0",
+  fontSize: 13,
+  padding: "6px 8px",
+  background: "#f1f5f9",
+  borderRadius: 6,
+  borderLeft: "3px solid #cbd5e1",
+};
 const item: React.CSSProperties = {
   border: "1px solid #eef2f7",
   borderRadius: 10,

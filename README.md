@@ -105,5 +105,29 @@ CLI alternative: `npm i -g vercel && cd frontend && vercel`.
 ## Status
 
 End-to-end demo path is implemented: contracts are published to testnet, the
-frontend builds and drives identity → publish → purchase → decrypt. Track
-remaining polish in [`CLAUDE.md`](./CLAUDE.md#current-status).
+frontend builds and drives identity → publish → purchase → decrypt. Datasets
+carry a public `preview` so buyers can evaluate before paying. Track remaining
+polish in [`CLAUDE.md`](./CLAUDE.md#current-status).
+
+## Roadmap (deliberately out of the MVP)
+
+Kept out of scope to protect the one clean demo, but designed-for:
+
+- **Verified-purchaser reviews.** A small `Review` object whose creation asserts
+  the author holds an `AccessGrant` for the dataset, so only real buyers can
+  rate. Honest framing required: this alone is **gameable by wash trading**
+  (a seller buying their own dataset from a second account costs only gas, since
+  the payment returns to them), so present it as "verified purchaser" feedback,
+  not absolute trust.
+- **Stake-backed reputation.** Make faking expensive: sellers stake SUI that can
+  be slashed, and/or fees are burned/escrowed so wash trading has real cost.
+  This is the prerequisite that turns review counts into meaningful reputation.
+- **Sybil-resistant / verified identity.** Today an `Identity` only proves
+  control of an address (self-asserted name + Human/Agent flag). Real seller
+  *eligibility* needs zkLogin or on-chain attestations/credentials so one human
+  ≠ many free identities.
+- **Data bounties (demand side).** A `Bounty` object where a buyer escrows SUI
+  for a described dataset and a seller fulfils it — very on-theme for agents
+  posting and filling data requests.
+- **Discovery.** Category/keyword filtering and sorting over listed datasets
+  (the marketplace currently shows the full list from `DatasetListed` events).

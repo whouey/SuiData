@@ -18,6 +18,8 @@ export interface ListDatasetArgs {
   title: string;
   description: string;
   category: string;
+  /** Public, unencrypted teaser shown before purchase. */
+  preview: string;
   /** Price in MIST. */
   price: number | bigint;
   walrusBlobId: string;
@@ -31,6 +33,7 @@ export interface Dataset {
   title: string;
   description: string;
   category: string;
+  preview: string;
   /** Price in MIST. */
   price: bigint;
   walrusBlobId: string;
@@ -70,6 +73,7 @@ export function useSuiData() {
         tx.pure.string(args.title),
         tx.pure.string(args.description),
         tx.pure.string(args.category),
+        tx.pure.string(args.preview),
         tx.pure.u64(args.price),
         tx.pure.string(args.walrusBlobId),
         tx.pure.vector("u8", Array.from(args.sealPolicyId)),
@@ -201,6 +205,7 @@ export function useDatasets() {
             title: String(f.title),
             description: String(f.description),
             category: String(f.category),
+            preview: String(f.preview ?? ""),
             price: BigInt(String(f.price)),
             walrusBlobId: String(f.walrus_blob_id),
             sealPolicyIdHex: vecU8ToHex(f.seal_policy_id),

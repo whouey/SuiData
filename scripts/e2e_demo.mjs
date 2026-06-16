@@ -16,7 +16,7 @@ import { fromHex, toHex } from "@mysten/sui/utils";
 import { SealClient, SessionKey } from "@mysten/seal";
 
 const PACKAGE_ID =
-  "0x3351d2f8ea2a62ed8ee75d7403a20d5dc4b47542a33e51bd2e3dfe8acddffdc1";
+  "0x52f348bce82689a8145279794ee705f829cdd47a8330e68fb8318140e6bb0914";
 const KEY_SERVER =
   "0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75";
 const KEY_SERVER_URL = "https://seal-key-server-testnet-1.mystenlabs.com";
@@ -111,6 +111,7 @@ let datasetId;
       tx.pure.string("E2E Survey"),
       tx.pure.string("headless test"),
       tx.pure.string("market-survey"),
+      tx.pure.string("preview: 3 sample rows, n=1200"),
       tx.pure.u64(10_000_000),
       tx.pure.string(blobId),
       tx.pure.vector("u8", Array.from(policyBytes)),

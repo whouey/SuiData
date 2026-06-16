@@ -30,6 +30,9 @@ public struct Dataset has key {
     title: String,
     description: String,
     category: String,
+    /// Public, UNencrypted teaser shown to buyers before purchase (e.g. a
+    /// sample row, schema, or summary stats). The full payload stays encrypted.
+    preview: String,
     /// Price in MIST (1 SUI = 1_000_000_000 MIST).
     price: u64,
     /// Walrus blob id of the encrypted payload.
@@ -77,6 +80,7 @@ public fun list_dataset(
     title: String,
     description: String,
     category: String,
+    preview: String,
     price: u64,
     walrus_blob_id: String,
     seal_policy_id: vector<u8>,
@@ -92,6 +96,7 @@ public fun list_dataset(
         title,
         description,
         category,
+        preview,
         price,
         walrus_blob_id,
         seal_policy_id,

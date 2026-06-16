@@ -47,7 +47,7 @@ path to that one demo, leave a `TODO` and move on.
 ### Deployed package address
 
 ```
-PACKAGE_ID = 0x3351d2f8ea2a62ed8ee75d7403a20d5dc4b47542a33e51bd2e3dfe8acddffdc1  # testnet
+PACKAGE_ID = 0x52f348bce82689a8145279794ee705f829cdd47a8330e68fb8318140e6bb0914  # testnet
 ```
 
 ### Walrus
@@ -69,8 +69,9 @@ PACKAGE_ID = 0x3351d2f8ea2a62ed8ee75d7403a20d5dc4b47542a33e51bd2e3dfe8acddffdc1 
   `display_name`, `created_at`. Owned (not shared) so it composes into other
   objects and txns.
 - **Dataset** — a SHARED object so anyone can read its metadata to browse. Fields:
-  `id`, `publisher` (address), `title`, `description`, `category`, `price` (u64, in
-  MIST), `walrus_blob_id`, `seal_policy_id`, `created_at`.
+  `id`, `publisher` (address), `title`, `description`, `category`, `preview`
+  (public unencrypted teaser), `price` (u64, in MIST), `walrus_blob_id`,
+  `seal_policy_id`, `created_at`.
 - **AccessGrant** — an OWNED object minted to the buyer on purchase. Proves payment
   and is the on-chain condition Seal checks before allowing decryption.
 
@@ -81,7 +82,7 @@ PACKAGE_ID = 0x3351d2f8ea2a62ed8ee75d7403a20d5dc4b47542a33e51bd2e3dfe8acddffdc1 
 - `public fun update_name(identity, new_name)`.
 
 `marketplace.move`:
-- `public fun list_dataset(identity, title, desc, category, price, blob_id, policy_id, ctx)`
+- `public fun list_dataset(identity, title, desc, category, preview, price, blob_id, policy_id, ctx)`
   — creates shared `Dataset`, asserts caller owns an `Identity`.
 - `public fun purchase(dataset, payment: Coin<SUI>, ctx)` — asserts
   `payment >= price`, sends payment to publisher, mints `AccessGrant` to buyer,
@@ -138,5 +139,5 @@ scripts/
       configured with Mysten's testnet key server (threshold 1).
 - [x] `lib/walrus.ts`: HTTP publisher/aggregator upload+download.
 - [x] Published package to testnet; `PACKAGE_ID` filled in (see above). UpgradeCap
-      `0xd9fe7230076340c73d7b37f3275773f238044769cc6585ab9578444a290ae4dc`.
+      `0x47981789d0f53f0960a5ce54c147f39060cc2b115f4dd13cad71ddaf98dfc2a0`.
 - [x] Frontend: identity creation, listing form, browse + purchase, decrypt + read.
