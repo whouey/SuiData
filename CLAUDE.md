@@ -52,8 +52,8 @@ PACKAGE_ID = 0x3351d2f8ea2a62ed8ee75d7403a20d5dc4b47542a33e51bd2e3dfe8acddffdc1 
 
 ### Walrus
 
-- Testnet publisher endpoint (placeholder): `https://publisher.walrus-testnet.walrus.space`
-- Testnet aggregator endpoint (placeholder): `https://aggregator.walrus-testnet.walrus.space`
+- Testnet publisher: `https://publisher.walrus-testnet.walrus.space`
+- Testnet aggregator: `https://aggregator.walrus-testnet.walrus.space`
 - Upload returns a `blobId`; store it on the `Dataset` object. See `frontend/src/lib/walrus.ts`.
 
 ### Seal
@@ -110,7 +110,7 @@ frontend/             Vite + React + TS dapp
   src/lib/seal.ts
 scripts/
   publish.sh          publishes the Move package
-  demo_publish.ts     scripted demo: list a dataset
+  e2e_demo.mjs        headless full-loop test on testnet (encrypt→buy→decrypt)
 ```
 
 ## Verification (how to self-check)

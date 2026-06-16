@@ -1,7 +1,4 @@
 // Shared network + contract configuration for SuiData.
-//
-// TODO: fill in PACKAGE_ID after `sui client publish` (see scripts/publish.sh),
-// then surface it via an env var (e.g. VITE_PACKAGE_ID).
 
 export const NETWORK = "testnet" as const;
 
@@ -15,7 +12,7 @@ export const MODULE = {
   marketplace: "marketplace",
 } as const;
 
-/** Walrus testnet endpoints (placeholders — confirm before the demo). */
+/** Walrus testnet HTTP endpoints (public publisher + aggregator). */
 export const WALRUS = {
   publisher: "https://publisher.walrus-testnet.walrus.space",
   aggregator: "https://aggregator.walrus-testnet.walrus.space",

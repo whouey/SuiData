@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useOwnedIdentities, useSuiData } from "../hooks/useSuiData";
+import { card, errStyle, mono } from "./ui";
 
 // Create / show the connected wallet's on-chain Identity. An Identity is
 // required before publishing datasets (list_dataset asserts ownership).
@@ -65,12 +66,3 @@ export function IdentityPanel() {
     </section>
   );
 }
-
-const card: React.CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 12,
-  padding: "1rem 1.25rem",
-  marginBottom: "1rem",
-};
-const mono: React.CSSProperties = { fontSize: 12, wordBreak: "break-all" };
-const errStyle: React.CSSProperties = { color: "#b91c1c", fontSize: 13 };

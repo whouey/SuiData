@@ -8,6 +8,7 @@ import {
   makeSealClient,
 } from "../lib/seal";
 import { uploadBlob } from "../lib/walrus";
+import { card, errStyle } from "./ui";
 
 const SUI = 1_000_000_000;
 
@@ -115,11 +116,3 @@ export function PublishForm({ identityId }: { identityId: string | null }) {
     </section>
   );
 }
-
-const card: React.CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 12,
-  padding: "1rem 1.25rem",
-  marginBottom: "1rem",
-};
-const errStyle: React.CSSProperties = { color: "#b91c1c", fontSize: 13 };

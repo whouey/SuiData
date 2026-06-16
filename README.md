@@ -26,7 +26,7 @@ The one flow this MVP nails:
 ```
 move/        Sui Move package (identity + marketplace modules)
 frontend/    Vite + React + TS dapp (@mysten/dapp-kit, @mysten/seal, @mysten/walrus)
-scripts/     publish.sh (deploy) + demo_publish.ts (scripted publisher demo)
+scripts/     publish.sh (deploy) + e2e_demo.mjs (headless full-loop test)
 ```
 
 ## Prerequisites
@@ -77,6 +77,30 @@ The app wires up `@mysten/dapp-kit` providers (testnet by default) and walks the
 full demo: create an identity, publish (encrypt via Seal → upload to Walrus →
 `list_dataset`), browse/buy, and decrypt + read. See `src/components/` and
 `src/hooks/useSuiData.ts`.
+
+## Tests
+
+```bash
+cd frontend && npm run test:smoke          # Playwright: app renders, no errors
+SUI_PRIVATE_KEY=suiprivkey... node scripts/e2e_demo.mjs   # full loop on testnet
+```
+
+`e2e_demo.mjs` runs the whole path headlessly (encrypt → Walrus → list →
+purchase → `seal_approve` → decrypt) and asserts the plaintext round-trips and
+that an unauthorized grant is denied.
+
+## Deploy the frontend (Vercel)
+
+The frontend is a static SPA — point Vercel at the `frontend/` subdirectory:
+
+1. Push to GitHub and "Add New Project" in Vercel, importing this repo.
+2. Set **Root Directory** = `frontend` (Framework auto-detects as Vite:
+   build `npm run build`, output `dist`).
+3. (Optional) add env var `VITE_PACKAGE_ID` — otherwise the published testnet
+   id in `src/lib/network.ts` is used.
+4. Deploy. Users need a Sui Wallet with a little testnet SUI to transact.
+
+CLI alternative: `npm i -g vercel && cd frontend && vercel`.
 
 ## Status
 

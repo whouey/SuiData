@@ -18,6 +18,7 @@ import {
   makeSessionKey,
 } from "../lib/seal";
 import { downloadBlob } from "../lib/walrus";
+import { card, errStyle } from "./ui";
 
 const SUI = 1_000_000_000;
 
@@ -158,12 +159,6 @@ function DatasetCard({
   );
 }
 
-const card: React.CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 12,
-  padding: "1rem 1.25rem",
-  marginBottom: "1rem",
-};
 const item: React.CSSProperties = {
   border: "1px solid #eef2f7",
   borderRadius: 10,
@@ -179,4 +174,3 @@ const pre: React.CSSProperties = {
   whiteSpace: "pre-wrap",
   fontSize: 13,
 };
-const errStyle: React.CSSProperties = { color: "#b91c1c", fontSize: 13 };
