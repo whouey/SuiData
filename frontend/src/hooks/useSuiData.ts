@@ -39,6 +39,12 @@ export interface Dataset {
   walrusBlobId: string;
   /** Seal policy id (hex, no 0x) the payload was encrypted under. */
   sealPolicyIdHex: string;
+  /** On-chain purchase count for this dataset. */
+  salesCount: number;
+  /** Seller reputation (derived): total datasets this publisher has listed. */
+  sellerDatasetsPublished: number;
+  /** Seller reputation (derived): total sales across this publisher's datasets. */
+  sellerSales: number;
 }
 
 export interface Identity {
@@ -194,7 +200,7 @@ export function useDatasets() {
         ids,
         options: { showContent: true },
       });
-      return objs.flatMap((o) => {
+      const datasets = objs.flatMap((o) => {
         const c = o.data?.content;
         if (!c || c.dataType !== "moveObject") return [];
         const f = c.fields as Record<string, unknown>;
@@ -209,9 +215,25 @@ export function useDatasets() {
             price: BigInt(String(f.price)),
             walrusBlobId: String(f.walrus_blob_id),
             sealPolicyIdHex: vecU8ToHex(f.seal_policy_id),
+            salesCount: Number(f.sales_count ?? 0),
+            sellerDatasetsPublished: 0,
+            sellerSales: 0,
           },
         ];
       });
+
+      // Derive per-seller reputation from the fetched listings.
+      const byPublisher: Record<string, { count: number; sales: number }> = {};
+      for (const d of datasets) {
+        const agg = (byPublisher[d.publisher] ??= { count: 0, sales: 0 });
+        agg.count += 1;
+        agg.sales += d.salesCount;
+      }
+      for (const d of datasets) {
+        d.sellerDatasetsPublished = byPublisher[d.publisher].count;
+        d.sellerSales = byPublisher[d.publisher].sales;
+      }
+      return datasets;
     },
   });
 }

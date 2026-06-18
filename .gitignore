@@ -5,6 +5,9 @@ move/build/
 node_modules/
 scripts/node_modules/
 
+# Demo runtime state (generated agent wallet, cached blobs)
+scripts/.demo/
+
 # Env
 .env
 .env.local

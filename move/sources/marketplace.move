@@ -42,6 +42,9 @@ public struct Dataset has key {
     /// per-dataset id is what stops one dataset's grant decrypting another's.
     seal_policy_id: vector<u8>,
     created_at: u64,
+    /// Number of times this dataset has been purchased. Bumped in `purchase`;
+    /// the seller's on-chain reputation signal.
+    sales_count: u64,
 }
 
 /// Proof of purchase, OWNED by the buyer. Seal checks for this before
@@ -102,6 +105,7 @@ public fun list_dataset(
         seal_policy_id,
         // TODO: use Clock for a real timestamp; epoch is a placeholder.
         created_at: ctx.epoch(),
+        sales_count: 0,
     };
 
     event::emit(DatasetListed {
@@ -120,9 +124,12 @@ public fun list_dataset(
 /// `PurchaseEvent`. Splits the exact `price` to the publisher and returns any
 /// change to the buyer, so the caller need not pass an exact coin.
 #[allow(lint(self_transfer))]
-public fun purchase(dataset: &Dataset, mut payment: Coin<SUI>, ctx: &mut TxContext) {
+public fun purchase(dataset: &mut Dataset, mut payment: Coin<SUI>, ctx: &mut TxContext) {
     let buyer = ctx.sender();
     assert!(coin::value(&payment) >= dataset.price, EInsufficientPayment);
+
+    // Bump the seller's on-chain reputation counter.
+    dataset.sales_count = dataset.sales_count + 1;
 
     // Split exactly `price` for the publisher; the remainder stays in `payment`
     // and is returned to the buyer as change.
@@ -173,6 +180,8 @@ public fun publisher(dataset: &Dataset): address { dataset.publisher }
 public fun walrus_blob_id(dataset: &Dataset): String { dataset.walrus_blob_id }
 
 public fun seal_policy_id(dataset: &Dataset): vector<u8> { dataset.seal_policy_id }
+
+public fun sales_count(dataset: &Dataset): u64 { dataset.sales_count }
 
 public fun grant_dataset_id(grant: &AccessGrant): ID { grant.dataset_id }
 

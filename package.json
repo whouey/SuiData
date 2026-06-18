@@ -1,0 +1,17 @@
+{
+  "name": "suidata-demo",
+  "private": true,
+  "type": "module",
+  "description": "Stage-demo orchestration scripts for SuiData (OCR seller + autonomous agent).",
+  "scripts": {
+    "ocr": "node scripts/ocr.mjs",
+    "agent": "node scripts/agent.mjs",
+    "demo:setup": "node scripts/demo_setup.mjs",
+    "demo:reset": "node scripts/demo_reset.mjs",
+    "e2e": "node scripts/e2e_demo.mjs"
+  },
+  "dependencies": {
+    "@mysten/seal": "^1.2.0",
+    "@mysten/sui": "^2.17.0"
+  }
+}

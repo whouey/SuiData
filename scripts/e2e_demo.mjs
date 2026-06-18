@@ -16,7 +16,7 @@ import { fromHex, toHex } from "@mysten/sui/utils";
 import { SealClient, SessionKey } from "@mysten/seal";
 
 const PACKAGE_ID =
-  "0x52f348bce82689a8145279794ee705f829cdd47a8330e68fb8318140e6bb0914";
+  "0xc7bc64fe3eb7d93cfcd45949f6816f7a351789aa813e13457a3d1b6d5077cabf";
 const KEY_SERVER =
   "0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75";
 const KEY_SERVER_URL = "https://seal-key-server-testnet-1.mystenlabs.com";

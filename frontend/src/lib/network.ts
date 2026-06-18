@@ -5,12 +5,15 @@ export const NETWORK = "testnet" as const;
 /** Deployed Move package id (testnet). Override via VITE_PACKAGE_ID. */
 export const PACKAGE_ID =
   (import.meta.env.VITE_PACKAGE_ID as string | undefined) ??
-  "0x52f348bce82689a8145279794ee705f829cdd47a8330e68fb8318140e6bb0914";
+  "0xc7bc64fe3eb7d93cfcd45949f6816f7a351789aa813e13457a3d1b6d5077cabf";
 
 export const MODULE = {
   identity: "identity",
   marketplace: "marketplace",
 } as const;
+
+/** Block explorer base for transaction / object links (testnet). */
+export const EXPLORER = "https://suiscan.xyz/testnet";
 
 /** Walrus testnet HTTP endpoints (public publisher + aggregator). */
 export const WALRUS = {

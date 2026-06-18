@@ -1,0 +1,11 @@
+{
+  "store": "Daylight Coffee Roasters",
+  "date": "2026-06-12",
+  "currency": "TWD",
+  "items": [
+    { "name": "Pour-over (Ethiopia)", "price": 180 },
+    { "name": "Almond croissant", "price": 95 },
+    { "name": "Cold brew 500ml", "price": 130 }
+  ],
+  "total": 405
+}

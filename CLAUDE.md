@@ -47,7 +47,7 @@ path to that one demo, leave a `TODO` and move on.
 ### Deployed package address
 
 ```
-PACKAGE_ID = 0x52f348bce82689a8145279794ee705f829cdd47a8330e68fb8318140e6bb0914  # testnet
+PACKAGE_ID = 0xc7bc64fe3eb7d93cfcd45949f6816f7a351789aa813e13457a3d1b6d5077cabf  # testnet
 ```
 
 ### Walrus
@@ -112,7 +112,18 @@ frontend/             Vite + React + TS dapp
 scripts/
   publish.sh          publishes the Move package
   e2e_demo.mjs        headless full-loop test on testnet (encrypt→buy→decrypt)
+  ocr.mjs             receipt photo → strict JSON (Anthropic vision, cached fallback)
+  demo_setup.mjs      fund agent, create identities, publish a receipt dataset
+  agent.mjs           autonomous buyer: find→pay→fetch→decrypt→decide
+  demo_reset.mjs      clear prepared listing + caches for a clean re-run
+  lib/common.mjs      shared client/seal/walrus helpers (timeouts + fallbacks)
+  fixtures/           receipt.png + known-good receipt.json (OCR cache)
+pitch/                static GTM slide material (NOT wired into the app)
+DEMO_RUNBOOK.md       stage runbook: commands, script, failure fallbacks
 ```
+
+Demo orchestration (root `package.json`): `npm run demo:setup`, `npm run agent`,
+`npm run demo:reset`, `npm run ocr`. See `DEMO_RUNBOOK.md`.
 
 ## Verification (how to self-check)
 
@@ -139,5 +150,5 @@ scripts/
       configured with Mysten's testnet key server (threshold 1).
 - [x] `lib/walrus.ts`: HTTP publisher/aggregator upload+download.
 - [x] Published package to testnet; `PACKAGE_ID` filled in (see above). UpgradeCap
-      `0x47981789d0f53f0960a5ce54c147f39060cc2b115f4dd13cad71ddaf98dfc2a0`.
+      `0x3c91dfce9344b75153c475c117eb55255b878364772633a0876d925abae0b538`.
 - [x] Frontend: identity creation, listing form, browse + purchase, decrypt + read.

@@ -18,6 +18,7 @@ import {
   makeSessionKey,
 } from "../lib/seal";
 import { downloadBlob } from "../lib/walrus";
+import { EXPLORER } from "../lib/network";
 import { card, errStyle } from "./ui";
 
 const SUI = 1_000_000_000;
@@ -62,6 +63,7 @@ function DatasetCard({
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [plaintext, setPlaintext] = useState<string | null>(null);
+  const [txDigest, setTxDigest] = useState<string | null>(null);
 
   const owned = !!grantId;
   const isPublisher = account?.address === dataset.publisher;
@@ -71,10 +73,11 @@ function DatasetCard({
     setError(null);
     try {
       setStatus("Purchasing…");
-      await purchase(dataset.id, dataset.price);
+      const res = await purchase(dataset.id, dataset.price);
+      setTxDigest(res.digest);
       await new Promise((r) => setTimeout(r, 1500));
-      queryClient.invalidateQueries(); // refresh grants
-      setStatus("✅ Purchased — you can decrypt now.");
+      queryClient.invalidateQueries(); // refresh grants + sales_count
+      setStatus(`✅ Paid ${Number(dataset.price) / SUI} SUI to seller — sales_count +1.`);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setStatus(null);
@@ -138,6 +141,14 @@ function DatasetCard({
         </code>
         {isPublisher && " (you)"}
       </p>
+      <p style={repStyle}>
+        ⭐ seller reputation · {dataset.sellerSales} sales ·{" "}
+        {dataset.sellerDatasetsPublished} datasets published
+        <span style={{ opacity: 0.6 }}>
+          {" "}
+          · this listing: {dataset.salesCount} sold
+        </span>
+      </p>
 
       <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
         {!owned ? (
@@ -157,14 +168,25 @@ function DatasetCard({
       </div>
 
       {status && <p style={{ fontSize: 13 }}>{status}</p>}
-      {error && <p style={errStyle}>{error}</p>}
-      {plaintext !== null && (
-        <pre style={pre}>{plaintext}</pre>
+      {txDigest && (
+        <p style={{ fontSize: 12 }}>
+          Payment tx:{" "}
+          <a href={`${EXPLORER}/tx/${txDigest}`} target="_blank" rel="noreferrer">
+            {txDigest.slice(0, 12)}… ↗
+          </a>
+        </p>
       )}
+      {error && <p style={errStyle}>{error}</p>}
+      {plaintext !== null && <pre style={pre}>{plaintext}</pre>}
     </div>
   );
 }
 
+const repStyle: React.CSSProperties = {
+  margin: "4px 0 0",
+  fontSize: 12,
+  color: "#7c5e10",
+};
 const previewStyle: React.CSSProperties = {
   margin: "4px 0",
   fontSize: 13,
