@@ -23,18 +23,24 @@ Everything else is roadmap. **Do not build:** reputation scoring, multi-chain,
 token economics, search/discovery, or admin tooling. If a feature isn't on the
 path to that one demo, leave a `TODO` and move on.
 
-## Demo flow
+## Demo flow (mobile phone seller + laptop agent)
 
-1. Agent creates an on-chain `Identity` (kind = Agent).
-2. Agent encrypts a market-survey dataset client-side (Seal), uploads ciphertext
-   to Walrus, gets a `walrus_blob_id`.
-3. Agent calls `marketplace::list_dataset(...)` → a shared `Dataset` object holding
-   metadata + `walrus_blob_id` + `seal_policy_id`.
-4. Buyer browses the shared `Dataset`, calls `marketplace::purchase(dataset, coin)`.
-   Payment goes to the publisher; an `AccessGrant` is minted to the buyer atomically.
-5. Buyer requests decryption. Seal's on-chain policy checks the buyer holds an
-   `AccessGrant` for this dataset, releases keys, buyer decrypts + reads. Nobody
-   else can.
+1. 📱 Seller signs in with Google (zkLogin/Enoki) on the phone — an `Identity` is
+   created on first sign-in; gas is sponsored, so no wallet/seed/SUI is involved.
+2. 📱 Seller photographs a receipt; `tesseract.js` OCRs it in-browser, it's
+   encrypted client-side (Seal), the ciphertext is uploaded to Walrus → `walrus_blob_id`.
+3. 📱 Seller's `marketplace::list_dataset(...)` creates a shared `Dataset` (metadata
+   + `walrus_blob_id` + `seal_policy_id`), gas sponsored.
+4. 💻 The autonomous agent (laptop CLI, its own funded wallet) finds the LATEST
+   `Dataset` and calls `marketplace::purchase(dataset, coin)`. Payment goes to the
+   publisher; an `AccessGrant` is minted to the agent atomically; `sales_count++`.
+5. 💻 Agent requests decryption. Seal's on-chain policy checks it holds an
+   `AccessGrant` for this dataset, releases keys, agent decrypts + decides.
+6. 📱 The phone's proof screen polls on-chain and shows payment received,
+   `sales_count`, and an explorer link.
+
+(The CLI-only loop — `npm run demo:setup` + `npm run agent` — still works headless
+for testing; see DEMO_RUNBOOK.md.)
 
 ## Tech stack + versions
 
@@ -42,7 +48,18 @@ path to that one demo, leave a `TODO` and move on.
 - **Storage:** Walrus (blob storage for dataset payloads).
 - **Access control:** Seal (client-side encryption + on-chain decryption policy).
 - **Frontend:** Vite + React + TypeScript + `@mysten/dapp-kit` + `@mysten/seal`.
-- **Wallet:** Sui Wallet (zkLogin is roadmap, not MVP).
+  **Mobile web, mobile-first** (the seller scans a receipt on a phone), installable
+  PWA (manifest + service worker) for fullscreen on stage.
+- **Wallet:** **zkLogin via `@mysten/enoki`** (sign in with Google). No browser
+  extension (phones have none), no seed phrase; **gas is sponsored** by Enoki so
+  the user never holds SUI. The extension/`ConnectButton` path is removed.
+- **OCR:** **`tesseract.js` in-browser** (keyless, client-side; assets self-hosted
+  under `frontend/public/tesseract` via `npm run vendor:ocr` so OCR makes no
+  network call). Falls back to a cached known-good receipt if it's slow/misreads.
+- **Stage serving:** camera APIs need a secure context, so the phone hits the app
+  over **real HTTPS** — a tunnel (`npm run demo:serve`, cloudflared/localtunnel,
+  prints URL + QR) or a Vercel deploy. A LAN IP will NOT work.
+- **Demo shape:** deliberate **phone (seller) + laptop (agent)** hybrid.
 
 ### Deployed package address
 
@@ -103,20 +120,31 @@ move/                 Sui Move package
   Move.toml
   sources/identity.move
   sources/marketplace.move
-frontend/             Vite + React + TS dapp
-  src/App.tsx
-  src/components/
-  src/hooks/useSuiData.ts
-  src/lib/walrus.ts
-  src/lib/seal.ts
+frontend/             Vite + React + TS mobile dapp (PWA)
+  index.html          PWA meta (manifest, apple/standalone, theme-color)
+  public/manifest.webmanifest, public/sw.js, public/icons/
+  public/tesseract/   self-hosted OCR assets (gitignored; `npm run vendor:ocr`)
+  src/App.tsx         routes: Login (zkLogin) → SellerFlow
+  src/auth/enoki.ts   register Enoki Google wallet + sponsored gas
+  src/components/Login.tsx        Google sign-in (zkLogin), extension excluded
+  src/components/SellerFlow.tsx   wizard: scan → publish → proof
+  src/components/ScanReceipt.tsx  camera capture + tesseract OCR + fallback
+  src/lib/ocr.ts      tesseract.js wrapper (progress, timeout, cached fallback)
+  src/lib/receipt.ts  Receipt shape + cached known-good + toDataset()
+  src/hooks/useSuiData.ts  on-chain reads/writes incl. usePurchaseProof (polls)
+  src/lib/walrus.ts, src/lib/seal.ts
 scripts/
   publish.sh          publishes the Move package
   e2e_demo.mjs        headless full-loop test on testnet (encrypt→buy→decrypt)
   ocr.mjs             receipt photo → strict JSON (Anthropic vision, cached fallback)
-  demo_setup.mjs      fund agent, create identities, publish a receipt dataset
-  agent.mjs           autonomous buyer: find→pay→fetch→decrypt→decide
+  demo_setup.mjs      fund agent, create identities, publish a receipt dataset,
+                      then start the HTTPS tunnel + QR (SKIP_TUNNEL=1 to skip)
+  serve.mjs           Vite dev + HTTPS tunnel + QR (npm run demo:serve)
+  vendor_tesseract.mjs  self-host tesseract.js assets (npm run vendor:ocr)
+  agent.mjs           autonomous buyer: find LATEST→pay→fetch→decrypt→decide
   demo_reset.mjs      clear prepared listing + caches for a clean re-run
   lib/common.mjs      shared client/seal/walrus helpers (timeouts + fallbacks)
+  lib/tunnel.mjs      cloudflared/localtunnel + QR (startTunnel)
   fixtures/           receipt.png + known-good receipt.json (OCR cache)
 pitch/                static GTM slide material (NOT wired into the app)
 DEMO_RUNBOOK.md       stage runbook: commands, script, failure fallbacks
@@ -152,3 +180,13 @@ Demo orchestration (root `package.json`): `npm run demo:setup`, `npm run agent`,
 - [x] Published package to testnet; `PACKAGE_ID` filled in (see above). UpgradeCap
       `0x3c91dfce9344b75153c475c117eb55255b878364772633a0876d925abae0b538`.
 - [x] Frontend: identity creation, listing form, browse + purchase, decrypt + read.
+- [x] **Mobile pivot**: zkLogin via Enoki (Google, sponsored gas) replaces the
+      extension wallet; phone camera capture; in-browser tesseract.js OCR with
+      cached fallback; mobile-first responsive UI; installable PWA.
+- [x] Phone+laptop hybrid: `SellerFlow` (scan→publish→proof) on the phone,
+      `npm run agent` on the laptop (now buys the LATEST listing).
+- [x] Stage serving: `npm run demo:serve` / `demo:setup` start an HTTPS tunnel +
+      QR; Vercel documented as the fallback. `npm run vendor:ocr` self-hosts OCR.
+- [ ] zkLogin login, phone camera, and the HTTPS tunnel can only be fully verified
+      on a real device/network (Enoki keys + hotspot) — not in CI. Build, 380px
+      render, smoke test, and the laptop agent loop are verified.

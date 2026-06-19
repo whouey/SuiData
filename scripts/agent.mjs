@@ -35,9 +35,15 @@ async function main() {
   say(`Agent online: ${addr} (identity ${st.agentId ? st.agentId.slice(0, 10) + "…" : "n/a"})`);
   say(`Wallet balance: ${fmtSui(await suiBalance(addr))} SUI`);
 
-  // 1. Find a listing (prefer the one setup prepared, for matching fallbacks).
+  // 1. Find a listing. Prefer the LATEST on-chain listing so the agent buys
+  // whatever the phone seller just published; fall back to the setup-prepared id.
   say("Scanning marketplace…");
-  const datasetId = st.datasetId || (await latestDatasetId());
+  let datasetId;
+  try {
+    datasetId = (await latestDatasetId()) || st.datasetId;
+  } catch {
+    datasetId = st.datasetId;
+  }
   if (!datasetId) throw new Error("no dataset listed — run `npm run demo:setup`");
   const ds = await getDataset(datasetId);
   say(`Found dataset: "${ds.title}" — ${fmtSui(ds.price)} SUI from seller ${ds.publisher.slice(0, 10)}…`);

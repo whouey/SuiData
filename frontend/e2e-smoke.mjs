@@ -1,5 +1,6 @@
-// Headless smoke test for the SuiData dapp.
-// Loads the app (no wallet connected) and verifies it renders without errors.
+// Headless smoke test for the SuiData mobile dapp.
+// Loads the app at a phone viewport (no wallet) and verifies the zkLogin screen
+// renders cleanly with no errors and no horizontal overflow.
 import { chromium } from "playwright";
 
 const URL = process.env.URL || "http://localhost:5173/";
@@ -12,7 +13,10 @@ const browser = await chromium.launch({
     "--single-process",
   ],
 });
-const page = await browser.newPage();
+const page = await browser.newPage({
+  viewport: { width: 380, height: 780 },
+  deviceScaleFactor: 2,
+});
 
 const consoleErrors = [];
 const pageErrors = [];
@@ -25,22 +29,36 @@ await page.goto(URL, { waitUntil: "domcontentloaded" });
 await page.waitForTimeout(2000);
 
 const h1 = await page.locator("h1").first().textContent();
-const connectBtn = await page.getByRole("button", { name: /connect/i }).count();
-const prompt = await page.getByText(/connect a sui wallet/i).count();
-const bodyText = await page.locator("body").innerText();
+// zkLogin sign-in (or the "configure Enoki" notice when keys are unset).
+const loginPresent = await page
+  .locator(".btn--google, .notice")
+  .count();
+const noHScroll = await page.evaluate(
+  () =>
+    document.documentElement.scrollWidth <=
+    document.documentElement.clientWidth + 1,
+);
+const manifest = await page.evaluate(() =>
+  fetch("/manifest.webmanifest").then((r) => r.status),
+);
 
 await page.screenshot({ path: "/tmp/suidata-home.png", fullPage: true });
 
-console.log("=== SuiData smoke test ===");
+console.log("=== SuiData mobile smoke test ===");
 console.log("h1:", JSON.stringify(h1));
-console.log("connect button present:", connectBtn > 0);
-console.log("wallet prompt present:", prompt > 0);
-console.log("package warning shown:", bodyText.includes("not yet published"));
+console.log("zkLogin screen present:", loginPresent > 0);
+console.log("no horizontal scroll @380px:", noHScroll);
+console.log("manifest status:", manifest);
 console.log("pageErrors:", pageErrors);
 console.log("consoleErrors:", consoleErrors);
 
 await browser.close();
 
-const ok = h1 === "SuiData" && connectBtn > 0 && pageErrors.length === 0;
+const ok =
+  h1 === "SuiData" &&
+  loginPresent > 0 &&
+  noHScroll &&
+  manifest === 200 &&
+  pageErrors.length === 0;
 console.log(ok ? "\nRESULT: PASS" : "\nRESULT: FAIL");
 process.exit(ok ? 0 : 1);

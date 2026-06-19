@@ -135,7 +135,24 @@ async function main() {
   say(`  seller   ${explorerAddr(seller.toSuiAddress())}`);
   say(`  agent    ${agent.toSuiAddress()}  (${fmtSui(await suiBalance(agent.toSuiAddress()))} SUI)`);
   say(`  dataset  ${explorerObj(datasetId)}`);
-  say("\nNext:  npm run agent");
+
+  // Expose the phone seller app over HTTPS (camera needs a secure context).
+  if (process.env.SKIP_TUNNEL) {
+    say("\n(SKIP_TUNNEL set — skipping HTTPS tunnel.)");
+    say("Next:  npm run agent");
+    return;
+  }
+  const port = Number(process.env.VITE_PORT || 5173);
+  say(`\nStarting HTTPS tunnel to the seller app on :${port} …`);
+  try {
+    const { startTunnel } = await import("./lib/tunnel.mjs");
+    await startTunnel(port); // prints HTTPS URL + QR, then stays alive
+    say("Laptop terminal 2:  npm run agent");
+  } catch (e) {
+    note(`tunnel unavailable (${e.message})`);
+    say("Fallback: deploy the frontend to Vercel (see DEMO_RUNBOOK.md), or run");
+    say("  npx localtunnel --port " + port + "   /   cloudflared tunnel --url http://localhost:" + port);
+  }
 }
 
 main().catch((e) => {

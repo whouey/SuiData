@@ -12,12 +12,14 @@
   },
   "dependencies": {
     "@mysten/dapp-kit": "^1.0.6",
+    "@mysten/enoki": "^1.1.1",
     "@mysten/seal": "^1.2.0",
     "@mysten/sui": "^2.17.0",
     "@mysten/walrus": "^1.1.7",
     "@tanstack/react-query": "^5.101.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

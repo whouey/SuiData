@@ -237,3 +237,55 @@ export function useDatasets() {
     },
   });
 }
+
+export interface PurchaseProof {
+  salesCount: number;
+  /** Most recent sale of this dataset, if any. */
+  lastSale: { txDigest: string; buyer: string; price: bigint } | null;
+}
+
+/**
+ * Live proof for one dataset: its on-chain sales_count plus the most recent
+ * PurchaseEvent (tx digest for the explorer link). Polls so the seller's phone
+ * updates the instant the agent buys. Pass `enabled` to start/stop polling.
+ */
+export function usePurchaseProof(datasetId: string | null, enabled = true) {
+  const client = useSuiClient();
+  return useQuery({
+    queryKey: ["purchaseProof", datasetId],
+    enabled: !!datasetId && enabled,
+    refetchInterval: 4000,
+    queryFn: async (): Promise<PurchaseProof> => {
+      const obj = await client.getObject({
+        id: datasetId!,
+        options: { showContent: true },
+      });
+      const c = obj.data?.content;
+      const f =
+        c && c.dataType === "moveObject"
+          ? (c.fields as Record<string, unknown>)
+          : {};
+      const salesCount = Number(f.sales_count ?? 0);
+
+      const events = await client.queryEvents({
+        query: {
+          MoveEventType: `${PACKAGE_ID}::${MODULE.marketplace}::PurchaseEvent`,
+        },
+        order: "descending",
+        limit: 50,
+      });
+      const match = events.data.find(
+        (e) =>
+          (e.parsedJson as { dataset_id?: string })?.dataset_id === datasetId,
+      );
+      const lastSale = match
+        ? {
+            txDigest: match.id.txDigest,
+            buyer: String((match.parsedJson as { buyer?: string }).buyer),
+            price: BigInt(String((match.parsedJson as { price?: string }).price ?? 0)),
+          }
+        : null;
+      return { salesCount, lastSale };
+    },
+  });
+}

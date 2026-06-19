@@ -1,47 +1,25 @@
-import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
-import { IdentityPanel } from "./components/IdentityPanel";
-import { PublishForm } from "./components/PublishForm";
-import { Marketplace } from "./components/Marketplace";
-import { useOwnedIdentities } from "./hooks/useSuiData";
-import "./App.css";
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import { Login } from "./components/Login";
+import { SellerFlow } from "./components/SellerFlow";
+import { ScanReceipt } from "./components/ScanReceipt";
 
-// SuiData demo shell: identity → publish (encrypt+Walrus+list) → browse/buy →
-// decrypt+read. See CLAUDE.md for the design.
+// Mobile seller app: sign in with Google (zkLogin) → scan a receipt → encrypt +
+// upload + list → watch the agent buy it. See CLAUDE.md / DEMO_RUNBOOK.md.
 function App() {
   const account = useCurrentAccount();
-  const { data: identities } = useOwnedIdentities();
-  const identityId = identities?.[0]?.id ?? null;
 
-  return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "2rem" }}>
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1rem",
-        }}
-      >
-        <div>
-          <h1 style={{ margin: 0 }}>SuiData</h1>
-          <p style={{ margin: 0, opacity: 0.6, fontSize: 14 }}>
-            Decentralized identity + data marketplace on Sui
-          </p>
+  // Dev-only screen previews (no wallet needed): /?preview=scan
+  if (import.meta.env.DEV) {
+    const preview = new URLSearchParams(window.location.search).get("preview");
+    if (preview === "scan")
+      return (
+        <div className="app">
+          <ScanReceipt onResult={(r) => console.log("scanned", r)} />
         </div>
-        <ConnectButton />
-      </header>
+      );
+  }
 
-      {account ? (
-        <>
-          <IdentityPanel />
-          <PublishForm identityId={identityId} />
-          <Marketplace />
-        </>
-      ) : (
-        <p>Connect a Sui wallet to begin.</p>
-      )}
-    </main>
-  );
+  return account ? <SellerFlow /> : <Login />;
 }
 
 export default App;
