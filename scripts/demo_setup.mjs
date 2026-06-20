@@ -111,7 +111,7 @@ async function sellerPublish(seller, identityId) {
 }
 
 async function main() {
-  say("— SuiData demo:setup —");
+  say("— OtterProof demo:setup —");
   await confirmPackage();
 
   const seller = sellerKeypair();

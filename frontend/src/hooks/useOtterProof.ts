@@ -1,4 +1,4 @@
-// React hooks exposing SuiData's on-chain actions + reads to components.
+// React hooks exposing OtterProof's on-chain actions + reads to components.
 //
 // Mutations build programmable transaction blocks against the deployed Move
 // package and submit them via the connected wallet. Reads use react-query.
@@ -55,7 +55,7 @@ export interface Identity {
 
 // === Mutations ===
 
-export function useSuiData() {
+export function useOtterProof() {
   const client = useSuiClient();
   const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
 

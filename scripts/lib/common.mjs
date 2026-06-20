@@ -1,4 +1,4 @@
-// Shared helpers for the SuiData demo scripts (OCR seller, agent, setup).
+// Shared helpers for the OtterProof demo scripts (OCR seller, agent, setup).
 //
 // Design goals for a live stage: never hang (everything is timeout-wrapped) and
 // never dead-end (network paths have cached fallbacks). Narratable output goes

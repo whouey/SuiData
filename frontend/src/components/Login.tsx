@@ -16,8 +16,9 @@ export function Login() {
     <div className="screen screen--center">
       <div className="brand">
         <div className="brand__logo">◈</div>
-        <h1>SuiData</h1>
-        <p className="muted">Turn a receipt into a dataset agents pay for.</p>
+        <h1>OtterProof</h1>
+        <p className="tagline">The verified data marketplace for the agent economy</p>
+        <p className="muted tiny">Turn a receipt into a dataset agents pay for.</p>
       </div>
 
       {googleWallet ? (

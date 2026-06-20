@@ -1,4 +1,4 @@
-/* SuiData mobile seller app — mobile-first, app-like (not a shrunk desktop). */
+/* OtterProof mobile seller app — mobile-first, app-like (not a shrunk desktop). */
 
 :root {
   --bg: #0e0b16;
@@ -105,6 +105,13 @@ body {
 .brand h1 {
   margin: 8px 0 0;
   font-size: 34px;
+}
+.tagline {
+  margin: 6px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #d7c9ff;
+  max-width: 300px;
 }
 
 /* Headings / text */

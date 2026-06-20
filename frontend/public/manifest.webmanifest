@@ -1,6 +1,6 @@
 {
-  "name": "SuiData — receipt to dataset",
-  "short_name": "SuiData",
+  "name": "OtterProof — receipt to dataset",
+  "short_name": "OtterProof",
   "description": "Scan a receipt, encrypt it, and sell it to AI agents on Sui.",
   "start_url": "/",
   "scope": "/",

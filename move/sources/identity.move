@@ -2,7 +2,7 @@
 ///
 /// `Identity` is an OWNED object so it composes into other objects and
 /// transactions (e.g. asserting a caller owns one before listing a dataset).
-module suidata::identity;
+module otterproof::identity;
 
 use std::string::String;
 

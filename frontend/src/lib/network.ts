@@ -1,4 +1,4 @@
-// Shared network + contract configuration for SuiData.
+// Shared network + contract configuration for OtterProof.
 
 export const NETWORK = "testnet" as const;
 

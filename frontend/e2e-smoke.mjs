@@ -1,4 +1,4 @@
-// Headless smoke test for the SuiData mobile dapp.
+// Headless smoke test for the OtterProof mobile dapp.
 // Loads the app at a phone viewport (no wallet) and verifies the zkLogin screen
 // renders cleanly with no errors and no horizontal overflow.
 import { chromium } from "playwright";
@@ -42,9 +42,9 @@ const manifest = await page.evaluate(() =>
   fetch("/manifest.webmanifest").then((r) => r.status),
 );
 
-await page.screenshot({ path: "/tmp/suidata-home.png", fullPage: true });
+await page.screenshot({ path: "/tmp/otterproof-home.png", fullPage: true });
 
-console.log("=== SuiData mobile smoke test ===");
+console.log("=== OtterProof mobile smoke test ===");
 console.log("h1:", JSON.stringify(h1));
 console.log("zkLogin screen present:", loginPresent > 0);
 console.log("no horizontal scroll @380px:", noHScroll);
@@ -55,7 +55,7 @@ console.log("consoleErrors:", consoleErrors);
 await browser.close();
 
 const ok =
-  h1 === "SuiData" &&
+  h1 === "OtterProof" &&
   loginPresent > 0 &&
   noHScroll &&
   manifest === 200 &&

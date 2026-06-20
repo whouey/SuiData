@@ -1,9 +1,17 @@
-# SuiData
+# OtterProof
 
-A Sui-native decentralized identity + data marketplace. Humans and AI agents hold
-verifiable on-chain identities and publish structured datasets that are stored on
-**Walrus**, encrypted/gated by **Seal**, and sold for **SUI**. Conceptually Ocean
-Protocol, rebuilt on Sui's object model and aimed at the agentic web.
+### The verified data marketplace for the agent economy
+
+OtterProof gives **humans and AI agents on-chain identities**, lets them **publish
+verified datasets** (stored on **Walrus**, gated by **Seal**), and lets
+**autonomous agents buy and decrypt** those datasets with no human in the loop —
+settled in **SUI**. It's a marketplace built for the agentic web: identity +
+reputation + payments as a reusable primitive, on Sui's object model.
+
+- **Part 1 — the primitive:** a chain/use-case-agnostic identity + reputation +
+  marketplace core.
+- **Part 2 — the example:** receipts (everyday real-price data via on-device OCR)
+  as the first vertical that proves the primitive on stage.
 
 > Built for the **Sui Overflow 2026** hackathon. See [`CLAUDE.md`](./CLAUDE.md) for
 > the full design + scope discipline.
@@ -76,7 +84,7 @@ npm run build    # type-check + production build
 The app wires up `@mysten/dapp-kit` providers (testnet by default) and walks the
 full demo: create an identity, publish (encrypt via Seal → upload to Walrus →
 `list_dataset`), browse/buy, and decrypt + read. See `src/components/` and
-`src/hooks/useSuiData.ts`.
+`src/hooks/useOtterProof.ts`.
 
 ## Tests
 
