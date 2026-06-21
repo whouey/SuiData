@@ -23,20 +23,40 @@ data-fetch have silent cached fallbacks, so a flaky network never breaks the flo
 ## 0. One-time prep (before stage)
 
 ### a) Enoki zkLogin + sponsored gas (REQUIRED — do this once, well ahead)
-1. Create an app at https://portal.enoki.mystenlabs.com → copy the **public API key**.
-2. Add a **Google OAuth client** (Google Cloud Console → OAuth client ID, type
-   Web). Authorized origin + redirect = your HTTPS demo URL (tunnel or Vercel).
-3. In Enoki: **enable Sponsored Transactions** and allowlist this package's
-   move targets: `…::identity::create_identity` and `…::marketplace::list_dataset`.
-4. Put the keys in `frontend/.env` (see `frontend/.env.example`):
-   ```
-   VITE_ENOKI_API_KEY=enoki_public_...
-   VITE_GOOGLE_CLIENT_ID=...apps.googleusercontent.com
-   ```
 
-> Without these the phone shows a "zkLogin not configured" notice. The Google
-> OAuth client's authorized origin/redirect MUST match the HTTPS URL you demo on,
-> so decide tunnel-vs-Vercel first (below) and register that exact URL.
+Enoki has **two** API keys and they do different jobs (this trips people up):
+
+| Key | Where it goes | Job |
+|---|---|---|
+| **Public** `enoki_public_…` | frontend (`VITE_ENOKI_API_KEY`) | zkLogin sign-in. **Cannot** sponsor gas. |
+| **Secret** `enoki_private_…` | **server only** (`ENOKI_SECRET_KEY`) | Sponsored Transactions. **Never** ship to the browser. |
+
+> The portal will say *"Sponsored transactions can not be enabled for public API
+> keys"* — that's expected. Sponsorship lives on the **secret** key, used by our
+> server function `frontend/api/sponsor.ts` (the production pattern: the user
+> signs, the server pays gas, so the phone holds no SUI).
+
+Steps:
+1. Create an app at https://portal.enoki.mystenlabs.com.
+2. **Google OAuth client** (Google Cloud Console → OAuth client ID, type Web).
+   Authorized origin + redirect = your HTTPS demo URL (Vercel recommended).
+3. Create a **Public** key → that's `VITE_ENOKI_API_KEY` (frontend).
+4. Create a **Secret** key → **enable Sponsored Transactions**, network testnet,
+   allowlist `…::identity::create_identity` and `…::marketplace::list_dataset`,
+   and **fund the sponsor** with testnet SUI. That's `ENOKI_SECRET_KEY` (server).
+5. Set vars:
+   - `frontend/.env` (local) / Vercel **client** env: `VITE_PACKAGE_ID`,
+     `VITE_ENOKI_API_KEY`, `VITE_GOOGLE_CLIENT_ID`.
+   - Vercel **server** env (NOT prefixed VITE_): `ENOKI_SECRET_KEY`.
+
+> Without the public key + Google client, the phone shows a "zkLogin not
+> configured" notice. Without the secret key on the server, sign-in works but
+> listing fails to sponsor. The Google OAuth origin/redirect MUST equal the exact
+> HTTPS URL you demo on (register the Vercel URL).
+
+> **Local sponsorship:** `vite dev` doesn't run the `/api` function. To test
+> sponsorship locally use `vercel dev` (runs the serverless function), or just
+> demo from the Vercel deployment.
 
 ### b) Install + vendor OCR assets + on-chain setup
 ```bash

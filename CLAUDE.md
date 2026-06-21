@@ -77,8 +77,14 @@ for testing; see DEMO_RUNBOOK.md.)
   **Mobile web, mobile-first** (the seller scans a receipt on a phone), installable
   PWA (manifest + service worker) for fullscreen on stage.
 - **Wallet:** **zkLogin via `@mysten/enoki`** (sign in with Google). No browser
-  extension (phones have none), no seed phrase; **gas is sponsored** by Enoki so
-  the user never holds SUI. The extension/`ConnectButton` path is removed.
+  extension (phones have none), no seed phrase; **gas is sponsored** so the user
+  never holds SUI. The extension/`ConnectButton` path is removed.
+  - Enoki **public** key (`VITE_ENOKI_API_KEY`) = frontend zkLogin only.
+  - Enoki **secret** key (`ENOKI_SECRET_KEY`, server-only) sponsors gas via the
+    serverless function `frontend/api/sponsor.ts` (create→user signs→execute).
+    `src/lib/sponsor.ts` drives it; `useOtterProof().run()` uses it for
+    `create_identity`/`list_dataset` when zkLogin is configured. The agent's
+    `purchase` is NOT sponsored (it has its own funded wallet).
 - **OCR:** **`tesseract.js` in-browser** (keyless, client-side; assets self-hosted
   under `frontend/public/tesseract` via `npm run vendor:ocr` so OCR makes no
   network call). Falls back to a cached known-good receipt if it's slow/misreads.
@@ -151,7 +157,9 @@ frontend/             Vite + React + TS mobile dapp (PWA)
   public/manifest.webmanifest, public/sw.js, public/icons/
   public/tesseract/   self-hosted OCR assets (gitignored; `npm run vendor:ocr`)
   src/App.tsx         routes: Login (zkLogin) → SellerFlow
-  src/auth/enoki.ts   register Enoki Google wallet + sponsored gas
+  api/sponsor.ts      server sponsor (Enoki SECRET key): create + execute
+  src/auth/enoki.ts   register Enoki Google wallet (public key, zkLogin)
+  src/lib/sponsor.ts  client side of sponsored-tx flow (build→sign→execute)
   src/components/Login.tsx        Google sign-in (zkLogin), extension excluded
   src/components/SellerFlow.tsx   wizard: scan → publish → proof
   src/components/ScanReceipt.tsx  camera capture + tesseract OCR + fallback

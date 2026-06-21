@@ -12,6 +12,8 @@ import {
 import { Transaction } from "@mysten/sui/transactions";
 import { useQuery } from "@tanstack/react-query";
 import { MODULE, PACKAGE_ID } from "../lib/network";
+import { useSponsoredExecutor } from "../lib/sponsor";
+import { zkLoginConfigured } from "../auth/enoki";
 
 export interface ListDatasetArgs {
   identityId: string;
@@ -58,6 +60,18 @@ export interface Identity {
 export function useOtterProof() {
   const client = useSuiClient();
   const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
+  const executeSponsored = useSponsoredExecutor();
+
+  /**
+   * Run a transaction. With zkLogin (Enoki) configured, gas is SPONSORED via the
+   * server (the user holds no SUI); otherwise sign+execute with the wallet's own
+   * gas. Both resolve to an object with `.digest`.
+   */
+  function run(tx: Transaction) {
+    return zkLoginConfigured
+      ? executeSponsored(tx)
+      : signAndExecute({ transaction: tx });
+  }
 
   /** identity::create_identity(kind, name) */
   async function createIdentity(kind: 0 | 1, name: string) {
@@ -66,7 +80,7 @@ export function useOtterProof() {
       target: `${PACKAGE_ID}::${MODULE.identity}::create_identity`,
       arguments: [tx.pure.u8(kind), tx.pure.string(name)],
     });
-    return signAndExecute({ transaction: tx });
+    return run(tx);
   }
 
   /** marketplace::list_dataset(...) */
@@ -85,12 +99,13 @@ export function useOtterProof() {
         tx.pure.vector("u8", Array.from(args.sealPolicyId)),
       ],
     });
-    return signAndExecute({ transaction: tx });
+    return run(tx);
   }
 
   /**
    * marketplace::purchase(dataset, payment). `purchase` returns change, so we
-   * just split the exact `price` off gas for the payment coin.
+   * just split the exact `price` off gas for the payment coin. (Buyer is the
+   * laptop agent in the demo; this path is not sponsored.)
    */
   async function purchase(datasetId: string, price: number | bigint) {
     const tx = new Transaction();
