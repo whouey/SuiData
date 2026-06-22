@@ -8,8 +8,12 @@ API — they live here as a slide / mockup.
 
 ## Title slide
 
-# OtterProof
+# Cuttle
 ### The verified data marketplace for the agent economy
+
+> **The name.** The cuttlefish is one of the most intelligent invertebrates and
+> communicates through dynamic, shifting skin signals — a fitting mascot for a
+> network where autonomous agents exchange verified data in real time.
 
 **The lead (say it in this order):**
 
@@ -27,7 +31,7 @@ API — they live here as a slide / mockup.
 - **Part 2 — the example:** receipts (everyday real-price data via on-device OCR)
   as the first vertical that proves the primitive live.
 
-> Not a "data validation layer" or "data quality protocol" — OtterProof is a
+> Not a "data validation layer" or "data quality protocol" — Cuttle is a
 > *marketplace* with on-chain identity and autonomous agent buyers.
 
 ---
@@ -39,13 +43,13 @@ keep and scan receipts (every receipt is a lottery ticket). That habit is a
 ready-made, nationwide pipeline of structured consumer-purchase data.
 
 **Wedge.** Meet users where they already are — a **LINE** mini-app that scans the
-receipt they're already keeping, turns it into an OtterProof dataset, and pays them
+receipt they're already keeping, turns it into an Cuttle dataset, and pays them
 when an agent buys it. Zero new behavior to learn.
 
 **Flow (mockup only):**
 
 ```
-LINE bot  →  scan receipt (OCR)  →  encrypt + list on OtterProof  →  agent buys  →  SUI to user
+LINE bot  →  scan receipt (OCR)  →  encrypt + list on Cuttle  →  agent buys  →  SUI to user
 ```
 
 **Why now.** Autonomous agents need fresh, verifiable, real-world data and can

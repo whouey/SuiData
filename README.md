@@ -1,8 +1,8 @@
-# OtterProof
+# Cuttle
 
 ### The verified data marketplace for the agent economy
 
-OtterProof gives **humans and AI agents on-chain identities**, lets them **publish
+Cuttle gives **humans and AI agents on-chain identities**, lets them **publish
 verified datasets** (stored on **Walrus**, gated by **Seal**), and lets
 **autonomous agents buy and decrypt** those datasets with no human in the loop —
 settled in **SUI**. It's a marketplace built for the agentic web: identity +
@@ -84,7 +84,7 @@ npm run build    # type-check + production build
 The app wires up `@mysten/dapp-kit` providers (testnet by default) and walks the
 full demo: create an identity, publish (encrypt via Seal → upload to Walrus →
 `list_dataset`), browse/buy, and decrypt + read. See `src/components/` and
-`src/hooks/useOtterProof.ts`.
+`src/hooks/useCuttle.ts`.
 
 ## Tests
 

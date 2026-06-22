@@ -4,13 +4,13 @@
 /// Buying calls `purchase`, which routes payment to the publisher and mints an
 /// `AccessGrant` (OWNED by the buyer) atomically. Seal gates decryption on the
 /// buyer holding an `AccessGrant` for the dataset.
-module otterproof::marketplace;
+module cuttle::marketplace;
 
 use std::string::String;
 use sui::coin::{Self, Coin};
 use sui::event;
 use sui::sui::SUI;
-use otterproof::identity::{Self, Identity};
+use cuttle::identity::{Self, Identity};
 
 // === Errors ===
 

@@ -1,13 +1,13 @@
-# CLAUDE.md — OtterProof
+# CLAUDE.md — Cuttle
 
-**OtterProof — The verified data marketplace for the agent economy**
+**Cuttle — The verified data marketplace for the agent economy**
 
 Guidance for Claude Code (and humans) working in this repo. Keep this file
 authoritative so future sessions don't drift from the agreed design.
 
 ## Positioning (lead all copy with this)
 
-OtterProof is a **verified data marketplace**. Lead every description with three
+Cuttle is a **verified data marketplace**. Lead every description with three
 things, in this order:
 
 1. **Identity for humans and agents** — both hold verifiable on-chain identities.
@@ -16,7 +16,7 @@ things, in this order:
 3. **A marketplace** — humans and agents publish verified datasets (stored on
    Walrus, gated by Seal) and sell access for SUI.
 
-Do **NOT** describe OtterProof as a "data validation layer" or "data quality
+Do **NOT** describe Cuttle as a "data validation layer" or "data quality
 protocol" — that is a different, existing project. Stay distinct: we are a
 *marketplace* with *on-chain identity* and *agent buyers*.
 
@@ -31,7 +31,7 @@ protocol" — that is a different, existing project. Stay distinct: we are a
 
 ## Project overview
 
-**OtterProof** is a Sui-native decentralized identity + data marketplace. Humans and
+**Cuttle** is a Sui-native decentralized identity + data marketplace. Humans and
 AI agents hold verifiable on-chain identities and publish structured datasets that
 are stored on **Walrus**, encrypted/gated by **Seal**, and sold for **SUI**.
 Conceptually Ocean Protocol, rebuilt on Sui's object model and aimed at the
@@ -82,7 +82,7 @@ for testing; see DEMO_RUNBOOK.md.)
   - Enoki **public** key (`VITE_ENOKI_API_KEY`) = frontend zkLogin only.
   - Enoki **secret** key (`ENOKI_SECRET_KEY`, server-only) sponsors gas via the
     serverless function `frontend/api/sponsor.ts` (create→user signs→execute).
-    `src/lib/sponsor.ts` drives it; `useOtterProof().run()` uses it for
+    `src/lib/sponsor.ts` drives it; `useCuttle().run()` uses it for
     `create_identity`/`list_dataset` when zkLogin is configured. The agent's
     `purchase` is NOT sponsored (it has its own funded wallet).
 - **OCR:** **`tesseract.js` in-browser** (keyless, client-side; assets self-hosted
@@ -165,7 +165,7 @@ frontend/             Vite + React + TS mobile dapp (PWA)
   src/components/ScanReceipt.tsx  camera capture + tesseract OCR + fallback
   src/lib/ocr.ts      tesseract.js wrapper (progress, timeout, cached fallback)
   src/lib/receipt.ts  Receipt shape + cached known-good + toDataset()
-  src/hooks/useOtterProof.ts  on-chain reads/writes incl. usePurchaseProof (polls)
+  src/hooks/useCuttle.ts  on-chain reads/writes incl. usePurchaseProof (polls)
   src/lib/walrus.ts, src/lib/seal.ts
 scripts/
   publish.sh          publishes the Move package

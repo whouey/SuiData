@@ -1,6 +1,6 @@
 {
-  "name": "OtterProof — receipt to dataset",
-  "short_name": "OtterProof",
+  "name": "Cuttle — receipt to dataset",
+  "short_name": "Cuttle",
   "description": "Scan a receipt, encrypt it, and sell it to AI agents on Sui.",
   "start_url": "/",
   "scope": "/",

@@ -1,4 +1,4 @@
-// Headless end-to-end test of the OtterProof demo loop against real testnet.
+// Headless end-to-end test of the Cuttle demo loop against real testnet.
 //
 // Exercises the same path the UI does, minus the browser wallet: encrypt (Seal)
 // -> upload (Walrus) -> list_dataset -> purchase -> seal_approve -> decrypt, and

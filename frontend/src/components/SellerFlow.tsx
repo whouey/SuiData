@@ -12,8 +12,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useOwnedIdentities,
   usePurchaseProof,
-  useOtterProof,
-} from "../hooks/useOtterProof";
+  useCuttle,
+} from "../hooks/useCuttle";
 import {
   encryptDataset,
   generatePolicyId,
@@ -34,7 +34,7 @@ export function SellerFlow() {
   const suiClient = useSuiClient();
   const queryClient = useQueryClient();
   const { mutate: disconnect } = useDisconnectWallet();
-  const { createIdentity, listDataset } = useOtterProof();
+  const { createIdentity, listDataset } = useCuttle();
   const { data: identities, refetch: refetchIdentities } = useOwnedIdentities();
 
   const [step, setStep] = useState<Step>("scan");
@@ -111,7 +111,7 @@ export function SellerFlow() {
   return (
     <div className="app">
       <header className="topbar">
-        <span className="topbar__brand">◈ OtterProof</span>
+        <span className="topbar__brand">◈ Cuttle</span>
         <button className="link" onClick={() => disconnect()}>
           {account.address.slice(0, 6)}…{account.address.slice(-4)} · sign out
         </button>

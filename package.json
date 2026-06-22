@@ -1,8 +1,8 @@
 {
-  "name": "otterproof-demo",
+  "name": "cuttle-demo",
   "private": true,
   "type": "module",
-  "description": "Stage-demo orchestration scripts for OtterProof (OCR seller + autonomous agent).",
+  "description": "Stage-demo orchestration scripts for Cuttle (OCR seller + autonomous agent).",
   "scripts": {
     "ocr": "node scripts/ocr.mjs",
     "agent": "node scripts/agent.mjs",

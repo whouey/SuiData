@@ -111,7 +111,7 @@ async function sellerPublish(seller, identityId) {
 }
 
 async function main() {
-  say("— OtterProof demo:setup —");
+  say("— Cuttle demo:setup —");
   await confirmPackage();
 
   const seller = sellerKeypair();

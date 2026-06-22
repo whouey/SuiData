@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish the OtterProof Move package to the active Sui network.
+# Publish the Cuttle Move package to the active Sui network.
 #
 # Prereqs:
 #   - `sui` CLI installed and `sui client` configured with a funded address
@@ -15,7 +15,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../move"
 
-echo "Building + publishing otterproof package..."
+echo "Building + publishing cuttle package..."
 sui client publish --gas-budget 200000000
 
 # TODO: parse the resulting packageId out of the JSON output and write it to

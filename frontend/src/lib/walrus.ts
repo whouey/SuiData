@@ -1,6 +1,6 @@
 // Walrus blob storage helpers.
 //
-// OtterProof stores the ENCRYPTED dataset payload on Walrus and keeps the returned
+// Cuttle stores the ENCRYPTED dataset payload on Walrus and keeps the returned
 // blobId on the on-chain Dataset object. Encryption happens in lib/seal.ts
 // BEFORE upload — plaintext never leaves the client.
 

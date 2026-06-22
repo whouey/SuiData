@@ -1,7 +1,7 @@
 // Minimal service worker: enables installability + fullscreen (standalone)
 // launch. Network-first; caches the app shell so a flaky stage network still
 // opens the UI. (Heavy assets like the OCR models are served fresh.)
-const CACHE = "otterproof-v1";
+const CACHE = "cuttle-v1";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {

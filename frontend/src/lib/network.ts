@@ -1,4 +1,4 @@
-// Shared network + contract configuration for OtterProof.
+// Shared network + contract configuration for Cuttle.
 
 export const NETWORK = "testnet" as const;
 

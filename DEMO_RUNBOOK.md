@@ -1,4 +1,4 @@
-# OtterProof — Live Demo Runbook (mobile phone + laptop)
+# Cuttle — Live Demo Runbook (mobile phone + laptop)
 
 A ~3–4 minute **phone + laptop hybrid** demo. A consumer scans a **real paper
 receipt with their phone** (mobile web, zkLogin — no wallet, no seed phrase, no
